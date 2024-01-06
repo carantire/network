@@ -3,8 +3,8 @@
 #include <iostream>
 #include <cmath>
 #include <utility>
-#include "Eigen/Dense"
-#include "EigenRand/EigenRand"
+#include <Eigen/Dense>
+#include <EigenRand/EigenRand/EigenRand>
 #include "Layer.h"
 #include "Score_Func.h"
 

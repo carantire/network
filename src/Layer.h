@@ -2,8 +2,8 @@
 
 #include "Threshold_Func.h"
 #include <utility>
-#include "Eigen/Dense"
-#include "EigenRand/EigenRand"
+#include <Eigen/Dense>
+#include <EigenRand/EigenRand/EigenRand>
 
 class Layer {
 

@@ -4,8 +4,8 @@
 #include "Threshold_Func.h"
 #include "Layer.h"
 #include <utility>
-#include "Eigen/Dense"
-#include "EigenRand/EigenRand"
+#include <Eigen/Dense>
+#include <EigenRand/EigenRand/EigenRand>
 
 
 enum class Score_Id {
