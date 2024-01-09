@@ -1,18 +1,20 @@
 #pragma once
 
 #include "Threshold_Func.h"
-#include <utility>
 #include <Eigen/Dense>
 #include <EigenRand/EigenRand/EigenRand>
+#include <utility>
+
+namespace network {
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 class Layer {
-
-public:
-
+    public:
     Layer(Threshold_Id id, int rows, int columns);
 
-    Eigen::VectorXd apply(const Eigen::VectorXd &x) const; // vector of values
-    Eigen::MatrixXd derive(const Eigen::VectorXd &vec) const;// vec is a matrix of y_i = (Ax + b)_i - result of apply
+    Eigen::VectorXd apply(const Eigen::VectorXd &x) const;    // vector of values
+    Eigen::MatrixXd derive(const Eigen::VectorXd &vec) const; // vec is a matrix of y_i = (Ax + b)_i - result of apply
 
     Eigen::MatrixXd gradA(const Eigen::VectorXd &x, const Eigen::VectorXd &u,
                           const Eigen::VectorXd &vec) const; // u is a gradient vector
@@ -25,9 +27,10 @@ public:
 
     void apply_gradb(const Eigen::VectorXd &grad, double coef);
 
-private:
+    private:
     static inline Eigen::Rand::Vmt19937_64 urng = 1;
     Threshold_Func threshold_func_;
     Eigen::MatrixXd A_;
     Eigen::VectorXd b_;
 };
+} // namespace network
