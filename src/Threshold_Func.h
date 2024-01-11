@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <EigenRand/EigenRand/EigenRand>
+#include <EigenRand/EigenRand>
 #include <cmath>
 #include <iostream>
 #include <utility>
@@ -39,6 +39,8 @@ struct Threshold_Database {
 };
 
 class Threshold_Func {
+    using MatrixXd = Eigen::MatrixXd;
+    using VectorXd = Eigen::VectorXd;
     using FunctionType = std::function<double(double)>;
 
     public:
@@ -55,9 +57,9 @@ class Threshold_Func {
 
     double evaluate_1(double x) const;
 
-    Eigen::VectorXd apply(const Eigen::VectorXd &vec) const;
+    VectorXd apply(const VectorXd &vec) const;
 
-    Eigen::VectorXd derive(const Eigen::VectorXd &vec) const;
+    VectorXd derive(const VectorXd &vec) const;
 
     private:
     FunctionType evaluate_0_;

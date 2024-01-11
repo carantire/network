@@ -32,3 +32,4 @@ Eigen::VectorXd Threshold_Func::derive(const Eigen::VectorXd &vec) const {
     return vec.unaryExpr([this](double x) { return evaluate_1(x); });
 }
 } // namespace network
+

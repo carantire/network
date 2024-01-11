@@ -1,3 +1,7 @@
 [submodule "EigenRand"]
 	path = EigenRand
 	url = https://github.com/bab2min/EigenRand
+[submodule "eigen"]
+	path = eigen
+	url = https://gitlab.com/libeigen/eigen
+	branch = 3.3

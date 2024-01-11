@@ -3,35 +3,41 @@
 //
 
 #include "Network.h"
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+using std::vector;
 namespace network {
 
-Network::Network(std::vector<int> dimensions, std::vector<Threshold_Id> threshold_funcs)
-    : dimensions_(std::move(dimensions)), threshold_funcs_(std::move(threshold_funcs)) {
-    layers.reserve(dimensions_.size() - 1);
-    for (size_t i = 0; i + 1 < dimensions_.size(); ++i) {
-        layers.emplace_back(Layer(threshold_funcs_[i], dimensions_[i], dimensions_[i + 1]));
+Network::Network(std::initializer_list<int> dimensions, std::initializer_list<Threshold_Id> threshold_id) {
+    layers_.reserve(dimensions_.size() - 1);
+    auto dim_it = dimensions.begin();
+    for (auto threshold_it = threshold_id.begin(); threshold_it != threshold_id.end(); ++dim_it, ++threshold_it) {
+        layers_.emplace_back(*threshold_it, *std::next(dim_it), *dim_it);
     }
 }
 
-Eigen::VectorXd Network::Forward_Prop(const Eigen::VectorXd &start_vec) {
-    Eigen::VectorXd cur_vec = start_vec;
-    for (size_t i = 0; i < layers.size(); ++i) {
-        in_values[i] = cur_vec;
-        cur_vec = layers[i].apply(cur_vec);
-        out_values[i] = cur_vec;
-        cur_vec = Threshold_Func::create(threshold_funcs_[i]).apply(cur_vec);
+Values Network::Forward_Prop(const VectorXd &start_vec) {
+    Values values;
+    values.in.reserve(layers_.size());
+    values.out.reserve(layers_.size());
+    VectorXd cur_vec = start_vec;
+    for (size_t i = 0; i < layers_.size(); ++i) {
+        values.in[i] = cur_vec;
+        cur_vec = layers_[i].apply(cur_vec);
+        values.out[i] = cur_vec;
+        cur_vec = Threshold_Func::create(threshold_id_[i]).apply(cur_vec);
     }
-    return cur_vec;
+    return values;
 }
 
-Eigen::VectorXd Network::Back_Prop(const Eigen::VectorXd &start_vec, const Eigen::VectorXd &reference,
-                                   const Score_Func &score_func, double coef) {
-    Eigen::VectorXd finish_vec = Forward_Prop(start_vec);
-    Eigen::VectorXd u = score_func.gradient(finish_vec, reference);
-    for (size_t i = layers.size() - 1; i != 0; --i) {
-        layers[i].apply_gradA(layers[i].gradA(in_values[i], u, out_values[i]), coef);
-        layers[i].apply_gradb(layers[i].gradb(u, out_values[i]), coef);
-        u = layers[i].gradx(u, out_values[i]);
+VectorXd Network::Back_Prop(const VectorXd &start_vec, const VectorXd &reference, const Score_Func &score_func,
+                            double step) {
+    Values values = Forward_Prop(start_vec);
+    VectorXd u = score_func.gradient(Threshold_Func::create(threshold_id_.back()).apply(values.out.back()), reference);
+    for (size_t i = layers_.size() - 1; i >= 0; --i) {
+        layers_[i].apply_gradA(layers_[i].gradA(values.in[i], u, values.out[i]), step);
+        layers_[i].apply_gradb(layers_[i].gradb(u, values.out[i]), step);
+        u = layers_[i].gradx(u, values.out[i]);
     }
     return u;
 }
