@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/Dense>
+#include <eigen/Eigen>
 #include <EigenRand/EigenRand>
 #include <cmath>
 #include <iostream>

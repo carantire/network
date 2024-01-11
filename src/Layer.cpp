@@ -22,13 +22,13 @@ MatrixXd Layer::derive(const VectorXd &vec) const { // vec is a matrix of y_i = 
 
 MatrixXd Layer::gradA(const VectorXd &x, const VectorXd &u,
                       const VectorXd &vec) const { // u is a gradient vector
-    return derive(vec) * u.transpose() * x.transpose();
+    return derive(vec) * u * x.transpose();
 }
 
-MatrixXd Layer::gradb(const VectorXd &u, const VectorXd &vec) const { return derive(vec) * u.transpose(); }
+MatrixXd Layer::gradb(const VectorXd &u, const VectorXd &vec) const { return derive(vec) * u; }
 
 VectorXd Layer::gradx(const VectorXd &u, const VectorXd &vec) const {
-    return (A_.transpose() * derive(vec) * u.transpose()).transpose();
+    return A_.transpose() * derive(vec) * u;
 }
 
 void Layer::apply_gradA(const MatrixXd &grad, double step) { A_ -= step * grad; }

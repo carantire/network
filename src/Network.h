@@ -33,7 +33,6 @@ class Network {
 
     private:
     vector<Layer> layers_;
-    vector<int> dimensions_;
     vector<Threshold_Id> threshold_id_;
 };
 } // namespace network
