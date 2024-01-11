@@ -19,7 +19,9 @@ Network::Network(std::initializer_list<int> dimensions, std::initializer_list<Th
 Values Network::Forward_Prop(const VectorXd &start_vec) {
     Values values;
     values.in.reserve(layers_.size());
+    values.in.resize(layers_.size());
     values.out.reserve(layers_.size());
+    values.out.resize(layers_.size());
     VectorXd cur_vec = start_vec;
     for (size_t i = 0; i < layers_.size(); ++i) {
         values.in[i] = cur_vec;
