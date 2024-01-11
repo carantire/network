@@ -25,7 +25,7 @@ class Network {
     using vector = std::vector<T>;
 
     public:
-    Network(std::initializer_list<int> dimensions, std::initializer_list<Threshold_Id> threshold_id);
+    Network(std::initializer_list<int> dimensions, std::initializer_list<Threshold_Id> threshold_id, Threshold_Id final_threshold_func);
 
     Values Forward_Prop(const VectorXd &start_vec);
 
@@ -34,5 +34,6 @@ class Network {
     private:
     vector<Layer> layers_;
     vector<Threshold_Id> threshold_id_;
+    Threshold_Id final_threshold_func_;
 };
 } // namespace network

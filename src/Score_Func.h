@@ -33,11 +33,11 @@ class Score_Func {
     using MatrixXd = Eigen::MatrixXd;
     using VectorXd = Eigen::VectorXd;
 
-    using ScoreType = std::function<double(const VectorXd &, const VectorXd &)>;
-    using GradientType = std::function<VectorXd(const VectorXd &, const VectorXd &)>;
+    using ScoreFuncType = std::function<double(const VectorXd &, const VectorXd &)>;
+    using GradientFuncType = std::function<VectorXd(const VectorXd &, const VectorXd &)>;
 
     public:
-    Score_Func(ScoreType score_func, GradientType gradient_func);
+    Score_Func(ScoreFuncType score_func, GradientFuncType gradient_func);
 
     template <Score_Id Id>
     static Score_Func create() {
@@ -51,7 +51,8 @@ class Score_Func {
     VectorXd gradient(const VectorXd &x, const VectorXd &reference) const;
 
     private:
-    ScoreType score_func_;
-    GradientType gradient_func_;
+    ScoreFuncType score_func_;
+
+    GradientFuncType gradient_func_;
 };
 } // namespace network

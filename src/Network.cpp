@@ -8,7 +8,7 @@ using Eigen::VectorXd;
 using std::vector;
 namespace network {
 
-Network::Network(std::initializer_list<int> dimensions, std::initializer_list<Threshold_Id> threshold_id): threshold_id_(threshold_id) {
+Network::Network(std::initializer_list<int> dimensions, std::initializer_list<Threshold_Id> threshold_id, Threshold_Id final_threshold_func): threshold_id_(threshold_id), final_threshold_func_(final_threshold_func) {
     layers_.reserve(dimensions.size() - 1);
     auto dim_it = dimensions.begin();
     for (auto threshold_it = threshold_id.begin(); threshold_it != threshold_id.end(); ++dim_it, ++threshold_it) {

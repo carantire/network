@@ -16,7 +16,7 @@ int main() {
     Eigen::Vector4d diff_vec(0.0, -2, 0.0 ,0.0);
     assert(test_score.gradient(test_vec, test_vec_2) == diff_vec);
     Layer test_layer(Threshold_Id::ReLu, 2, 2);
-    Network test_net({4, 2, 2}, {Threshold_Id::Sigmoid, Threshold_Id::ReLu});
+    Network test_net({4, 2, 2}, {Threshold_Id::Sigmoid, Threshold_Id::ReLu}, Threshold_Id::ReLu);
     auto test_val = test_net.Forward_Prop(test_vec);
     Eigen::VectorXd a(2);
     a << 1, 2;
