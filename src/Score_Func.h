@@ -52,7 +52,6 @@ class Score_Func {
 
     private:
     ScoreFuncType score_func_;
-
     GradientFuncType gradient_func_;
 };
 } // namespace network

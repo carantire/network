@@ -9,8 +9,10 @@ using MatrixXd = Eigen::MatrixXd;
 using VectorXd = Eigen::VectorXd;    
 
 Layer::Layer(Threshold_Id id, int rows, int columns)
-    : threshold_func_(Threshold_Func::create(id)), A_(Eigen::Rand::normal<MatrixXd>(rows, columns, urng)),
-      b_(Eigen::Rand::normal<VectorXd>(rows, 1, urng)) {}
+    : threshold_func_(Threshold_Func::create(id))
+      {
+
+      }
 
 VectorXd Layer::apply(const VectorXd &x) const { // vector of values
     return threshold_func_.apply(A_ * x + b_);
@@ -34,4 +36,10 @@ VectorXd Layer::gradx(const VectorXd &u, const VectorXd &vec) const {
 void Layer::apply_gradA(const MatrixXd &grad, double step) { A_ -= step * grad; }
 
 void Layer::apply_gradb(const VectorXd &grad, double step) { b_ -= step * grad; }
+
+static MatrixXd getNormal(int rows, int columns, Eigen::Rand::Vmt19937_64 urng) {
+  assert(rows > 0 && "rows must be positive!");
+  assert(columns > 0 && "columns must be positive!");
+  return Eigen::Rand::normal<MatrixXd>(rows, columns, urng);
+}
 } // namespace network

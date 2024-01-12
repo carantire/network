@@ -10,6 +10,7 @@ Threshold_Func::Threshold_Func(FunctionType evaluate_0, FunctionType evaluate_1)
     : evaluate_0_(std::move(evaluate_0)), evaluate_1_(std::move(evaluate_1)) {}
 
 Threshold_Func Threshold_Func::create(Threshold_Id threshold) {
+//    assert(evaluate_0_ && "Empty evaluate_0 method!");
     switch (threshold) {
     case Threshold_Id::Sigmoid:
         return Threshold_Func::create<Threshold_Id::Sigmoid>();

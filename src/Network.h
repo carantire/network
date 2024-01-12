@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <utility>
+#include <random>
 
 namespace network {
 
@@ -31,9 +32,13 @@ class Network {
 
     VectorXd Back_Prop(const VectorXd &start_vec, const VectorXd &reference, const Score_Func &score_func, double coef);
 
+    VectorXd Back_Prop_BGD(const VectorXd &start_vec, const VectorXd &reference, const Score_Func &score_func, int iter_num);
+
+    VectorXd Back_Prop_SGD(const MatrixXd &start_batch, const MatrixXd &reference, const Score_Func &score_func, int iter_num);
     private:
     vector<Layer> layers_;
     vector<Threshold_Id> threshold_id_;
     Threshold_Id final_threshold_func_;
+    inline static std::minstd_rand index_generator;
 };
 } // namespace network

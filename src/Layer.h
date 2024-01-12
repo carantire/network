@@ -29,6 +29,7 @@ class Layer {
     void apply_gradb(const VectorXd &grad, double step);
 
     private:
+    static MatrixXd getNormal(int rows, int columns, Eigen::Rand::Vmt19937_64 urng);
     static inline Eigen::Rand::Vmt19937_64 urng = 1;
     Threshold_Func threshold_func_;
     MatrixXd A_;

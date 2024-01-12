@@ -21,6 +21,14 @@ int main() {
     Eigen::VectorXd a(2);
     a << 1, 2;
     auto train = test_net.Back_Prop(test_vec, a, test_score, 0.5);
-    std::cout << "Hello";
+    Eigen::MatrixXd m(4, 3);
+    m << 1, 2, 3, 4, 5, 6, 0, -1, -4, 0, 0, 0;
+    std::cout << m.transpose() * m.col(0)   << '\n';
+    Eigen::MatrixXd ref(2, 3);
+    ref << 1, 2, 3, 4, 5, 6;
+    std::cout << train << "\n\n";
+    train = test_net.Back_Prop_BGD(test_vec, a, test_score, 1);
+    std::cout << train << "\n\n";
+    train = test_net.Back_Prop_SGD(m, ref, test_score, 2);
     return 0;
 }

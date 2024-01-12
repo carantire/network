@@ -18,9 +18,7 @@ Network::Network(std::initializer_list<int> dimensions, std::initializer_list<Th
 
 Values Network::Forward_Prop(const VectorXd &start_vec) {
     Values values;
-    values.in.reserve(layers_.size());
     values.in.resize(layers_.size());
-    values.out.reserve(layers_.size());
     values.out.resize(layers_.size());
     VectorXd cur_vec = start_vec;
     for (size_t i = 0; i < layers_.size(); ++i) {
@@ -44,4 +42,11 @@ VectorXd Network::Back_Prop(const VectorXd &start_vec, const VectorXd &reference
     }
     return u;
 }
-} // namespace network
+VectorXd Network::Back_Prop_BGD(const VectorXd &start_vec, const VectorXd &reference, const Score_Func &score_func, int iter_num){
+    return Back_Prop(start_vec, reference, score_func, 1.0/iter_num);
+}
+VectorXd Network::Back_Prop_SGD(const MatrixXd &start_batch, const MatrixXd &reference, const Score_Func &score_func, int iter_num){
+    auto rand_ind = index_generator() % start_batch.cols();
+    return Back_Prop_BGD(start_batch.col(rand_ind), reference.col(rand_ind), score_func, iter_num);
+}
+}// namespace network
