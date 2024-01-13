@@ -5,6 +5,8 @@
 #include "Threshold_Func.h"
 
 namespace network {
+using VectorXd = Threshold_Func::VectorXd;
+using MatrixXd = Threshold_Func::MatrixXd;
 
 Threshold_Func::Threshold_Func(FunctionType evaluate_0, FunctionType evaluate_1)
     : evaluate_0_(std::move(evaluate_0)), evaluate_1_(std::move(evaluate_1)) {}
@@ -24,11 +26,11 @@ double Threshold_Func::evaluate_0(double x) const { return evaluate_0_(x); }
 
 double Threshold_Func::evaluate_1(double x) const { return evaluate_1_(x); }
 
-Eigen::VectorXd Threshold_Func::apply(const Eigen::VectorXd &vec) const {
+VectorXd Threshold_Func::apply(const VectorXd &vec) const {
   return vec.unaryExpr([this](double x) { return evaluate_0(x); });
 }
 
-Eigen::VectorXd Threshold_Func::derive(const Eigen::VectorXd &vec) const {
+VectorXd Threshold_Func::derive(const VectorXd &vec) const {
   return vec.unaryExpr([this](double x) { return evaluate_1(x); });
 }
 } // namespace network

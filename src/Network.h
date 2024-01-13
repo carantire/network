@@ -26,8 +26,7 @@ public:
   using VectorXd = Eigen::VectorXd;
 
   Network(std::initializer_list<int> dimensions,
-          std::initializer_list<Threshold_Id> threshold_id,
-          Threshold_Id final_threshold_func);
+          std::initializer_list<Threshold_Id> threshold_id);
 
   Values Forward_Prop(const VectorXd &start_vec);
 

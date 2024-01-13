@@ -6,7 +6,7 @@
 
 namespace network {
 
-enum class Score_Id { MSE };
+enum class Score_Id { MSE, MAE };
 
 struct Score_Database {
   using MatrixXd = Eigen::MatrixXd;
@@ -27,6 +27,20 @@ struct Score_Database {
   inline VectorXd gradient<Score_Id::MSE>(const VectorXd &x,
                                           const VectorXd &reference) {
     return 2.0 * (x - reference);
+  }
+
+  template <>
+  inline double score<Score_Id::MAE>(const VectorXd &x,
+                                     const VectorXd &reference) {
+    return (x - reference).array().abs().sum();
+  }
+
+  template <>
+  inline VectorXd gradient<Score_Id::MAE>(const VectorXd &x,
+                                          const VectorXd &reference) {
+    return (x - reference).unaryExpr([](double el) {
+      return el > 0 ? 1.0 : -1.0;
+    });
   }
 };
 

@@ -34,11 +34,11 @@ struct Threshold_Database {
 };
 
 class Threshold_Func {
-  using MatrixXd = Eigen::MatrixXd;
-  using VectorXd = Eigen::VectorXd;
   using FunctionType = std::function<double(double)>;
 
 public:
+  using MatrixXd = Eigen::MatrixXd;
+  using VectorXd = Eigen::VectorXd;
   Threshold_Func(FunctionType evaluate_0, FunctionType evaluate_1);
 
   template <Threshold_Id Id> static Threshold_Func create() {

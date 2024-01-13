@@ -15,14 +15,13 @@ int main() {
       1.0 / (1.0 + std::exp(1)), 1.0 / (1.0 + std::exp(0)),
       1.0 / (1.0 + std::exp(-1)), 1.0 / (1.0 + std::exp(-2)));
   assert(test_func_sigmoid.apply(test_vec) == right_vec);
-  Score_Func test_score = Score_Func::create(Score_Id::MSE);
+  Score_Func test_score = Score_Func::create(Score_Id::MAE);
   Eigen::Vector4d test_vec_2(-1.0, 1.0, 1.0, 2);
   assert(test_score.score(test_vec, test_vec_2) == 1);
   Eigen::Vector4d diff_vec(0.0, -2, 0.0, 0.0);
   assert(test_score.gradient(test_vec, test_vec_2) == diff_vec);
   Layer test_layer(Threshold_Id::ReLu, 2, 2);
-  Network test_net({4, 2, 2}, {Threshold_Id::Sigmoid, Threshold_Id::ReLu},
-                   Threshold_Id::ReLu);
+  Network test_net({4, 2, 2}, {Threshold_Id::Sigmoid, Threshold_Id::ReLu});
   auto test_val = test_net.Forward_Prop(test_vec);
   Eigen::VectorXd a(2);
   a << 1, 2;
