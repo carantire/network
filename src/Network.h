@@ -40,6 +40,7 @@ public:
                          const Score_Func &score_func, int iter_num);
 
 private:
+
   vector<Layer> layers_;
   vector<Threshold_Id> threshold_id_;
   inline static std::minstd_rand index_generator;

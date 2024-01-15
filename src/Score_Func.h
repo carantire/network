@@ -6,11 +6,13 @@
 
 namespace network {
 
-enum class Score_Id { MSE, MAE };
+enum class Score_Id { MSE, MAE, CrossEntropy };
 
 struct Score_Database {
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
+
+  static VectorXd SoftMax(const VectorXd &vec);
 
   template <Score_Id> static double score(const VectorXd &, const VectorXd &);
 
@@ -41,6 +43,20 @@ struct Score_Database {
     return (x - reference).unaryExpr([](double el) {
       return el > 0 ? 1.0 : -1.0;
     });
+  }
+  template <>
+  inline double score<Score_Id::CrossEntropy>(const VectorXd &x,
+                                              const VectorXd &reference) {
+    return -reference.transpose() *
+           SoftMax(x).unaryExpr([](double x) { return log(x); });
+  }
+  template <>
+  inline VectorXd gradient<Score_Id::CrossEntropy>(const VectorXd &x,
+                                                   const VectorXd &reference) {
+    auto exp_sum = x.array().exp().sum();
+    auto const_vec = x.unaryExpr([](double el) { return exp(el); }) -
+                     exp_sum * VectorXd::Ones(x.size());
+    return const_vec * reference / exp_sum;
   }
 };
 

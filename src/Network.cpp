@@ -57,4 +57,5 @@ VectorXd Network::Back_Prop_SGD(const MatrixXd &start_batch,
   return Back_Prop_BGD(start_batch.col(rand_ind), reference.col(rand_ind),
                        score_func, iter_num);
 }
+
 } // namespace network
