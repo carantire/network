@@ -22,9 +22,15 @@ Threshold_Func Threshold_Func::create(Threshold_Id threshold) {
   }
 }
 
-double Threshold_Func::evaluate_0(double x) const { return evaluate_0_(x); }
+double Threshold_Func::evaluate_0(double x) const {
+  assert(evaluate_0_ && "Empty evaluate_0 method!");
+  return evaluate_0_(x);
+}
 
-double Threshold_Func::evaluate_1(double x) const { return evaluate_1_(x); }
+double Threshold_Func::evaluate_1(double x) const {
+  assert(evaluate_1_ && "Empty evaluate_1 method!");
+  return evaluate_1_(x);
+}
 
 VectorXd Threshold_Func::apply(const VectorXd &vec) const {
   return vec.unaryExpr([this](double x) { return evaluate_0(x); });
