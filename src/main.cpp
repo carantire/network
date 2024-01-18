@@ -2,7 +2,6 @@
 #include <cassert>
 
 using namespace network;
-using namespace std;
 using MatrixXd = Network::MatrixXd;
 using VectorXd = Network::VectorXd;
 

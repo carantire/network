@@ -84,7 +84,7 @@ void Network::TrainSGD(const MatrixXd &start_batch, const MatrixXd &reference,
                        const Score_Func &score_func, double needed_accuracy,
                        int max_epochs) {
   int epochs = 0;
-  double cur_acc = 1e9;
+  double cur_acc = std::numeric_limits<double>::infinity();
   vector<Values> values(start_batch.cols());
   while (epochs != max_epochs && cur_acc >= needed_accuracy) {
     for (int i = 0; i < start_batch.cols(); ++i) {
