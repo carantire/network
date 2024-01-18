@@ -28,6 +28,8 @@ public:
 
   void apply_gradb(const VectorXd &grad, double step);
 
+  int Get_Dim();
+
 private:
   static MatrixXd getNormal(int rows, int columns);
   static inline Eigen::Rand::Vmt19937_64 urng = 1;

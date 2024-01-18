@@ -24,25 +24,32 @@ class Network {
 public:
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
+  using PermutationMatrix =
+      Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic>;
 
   Network(std::initializer_list<int> dimensions,
           std::initializer_list<Threshold_Id> threshold_id);
 
-  Values Forward_Prop(const VectorXd &start_vec);
+  VectorXd Apply(const VectorXd &start_vec);
 
-  VectorXd Back_Prop(const VectorXd &start_vec, const VectorXd &reference,
-                     const Score_Func &score_func, double coef);
+  void TrainSGD(const MatrixXd &start_batch, const MatrixXd &reference,
+                const Score_Func &score_func, double needed_accuracy,
+                int max_epochs);
+  void TrainBGD(const MatrixXd &start_batch, const MatrixXd &reference,
+                const Score_Func &score_func, int cols_in_minibatch,
+                double needed_accuracy, int max_epochs);
 
-  VectorXd Back_Prop_BGD(const VectorXd &start_vec, const VectorXd &reference,
-                         const Score_Func &score_func, int iter_num);
+private:
+  PermutationMatrix GetRandMat(int cols);
+  VectorXd Back_Prop(const vector<Values> &values, const MatrixXd &reference,
+                     const Score_Func &score_func, double step);
 
   VectorXd Back_Prop_SGD(const MatrixXd &start_batch, const MatrixXd &reference,
                          const Score_Func &score_func, int iter_num);
 
-private:
-
+  Values Forward_Prop(const VectorXd &start_vec);
   vector<Layer> layers_;
   vector<Threshold_Id> threshold_id_;
-  inline static std::minstd_rand index_generator;
+  inline static std::minstd_rand index_generator_;
 };
 } // namespace network

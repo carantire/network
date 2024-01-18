@@ -48,4 +48,6 @@ MatrixXd Layer::getNormal(int rows, int columns) {
   return Eigen::Rand::normal<MatrixXd>(rows, columns, urng);
 }
 
+int Layer::Get_Dim() { return A_.cols(); }
+
 } // namespace network
