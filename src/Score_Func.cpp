@@ -3,6 +3,7 @@
 //
 
 #include "Score_Func.h"
+
 using Eigen::VectorXd;
 
 namespace network {

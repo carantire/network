@@ -3,7 +3,9 @@
 //
 
 #include "Network.h"
+
 namespace network {
+
 using VectorXd = Network::VectorXd;
 using PermutationMatrix = Network::PermutationMatrix;
 
