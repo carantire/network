@@ -1,21 +1,15 @@
 #pragma once
 
 #include "Layer.h"
-#include "Score_Func.h"
+#include "ScoreFunc.h"
 #include <Eigen/Eigen>
-#include <EigenRand/EigenRand>
-#include <cmath>
-#include <iostream>
-#include <random>
-#include <utility>
 
 namespace network {
 
-struct Values {
-  using VectorXd = Eigen::VectorXd;
-  template <class T> using vector = std::vector<T>;
-  vector<VectorXd> in;
-  vector<VectorXd> out;
+struct LayerValue {
+  using MatrixXd = Eigen::MatrixXd;
+  MatrixXd in;
+  MatrixXd out;
 };
 
 class Network {
@@ -24,32 +18,25 @@ class Network {
 public:
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
-  using PermutationMatrix =
-      Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic>;
+  template <class T> using vector = std::vector<T>;
+  using Index = Eigen::Index;
 
   Network(std::initializer_list<int> dimensions,
-          std::initializer_list<Threshold_Id> threshold_id);
+          std::initializer_list<ThresholdId> threshold_id);
 
-  VectorXd Apply(const VectorXd &start_vec);
+  VectorXd Calculate(const VectorXd &start_vec) const;
 
-  void TrainSGD(const MatrixXd &start_batch, const MatrixXd &reference,
-                const Score_Func &score_func, double needed_accuracy,
-                int max_epochs);
-  void TrainBGD(const MatrixXd &start_batch, const MatrixXd &reference,
-                const Score_Func &score_func, int cols_in_minibatch,
-                double needed_accuracy, int max_epochs);
+  void Train(const MatrixXd &start_batch, const MatrixXd &target,
+             const ScoreFunc &score_func, size_t max_epochs, double accuracy);
 
 private:
-  PermutationMatrix GetRandMat(int cols);
-  VectorXd Back_Prop(const vector<Values> &values, const MatrixXd &reference,
-                     const Score_Func &score_func, double step);
+  vector<LayerValue> Forward_Prop(const MatrixXd &start_vec) const;
+  double Back_Prop(const vector<LayerValue> &layer_values,
+                   const MatrixXd &target, const ScoreFunc &score_func,
+                   double step);
+  MatrixXd GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
+                         const ScoreFunc &score_func) const;
 
-  VectorXd Back_Prop_SGD(const MatrixXd &start_batch, const MatrixXd &reference,
-                         const Score_Func &score_func, int iter_num);
-
-  Values Forward_Prop(const VectorXd &start_vec);
   vector<Layer> layers_;
-  vector<Threshold_Id> threshold_id_;
-  inline static std::minstd_rand index_generator_;
 };
 } // namespace network

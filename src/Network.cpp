@@ -3,127 +3,80 @@
 //
 
 #include "Network.h"
+#include "ThresholdFunc.h"
 
 namespace network {
 
 using VectorXd = Network::VectorXd;
-using PermutationMatrix = Network::PermutationMatrix;
+using MatrixXd = Network::MatrixXd;
+using vector = Network::vector<LayerValue>;
 
 Network::Network(std::initializer_list<int> dimensions,
-                 std::initializer_list<Threshold_Id> threshold_id)
-    : threshold_id_(threshold_id) {
+                 std::initializer_list<ThresholdId> threshold_id) {
+  assert(dimensions.size() == threshold_id.size() + 1);
   layers_.reserve(dimensions.size() - 1);
   auto dim_it = dimensions.begin();
   for (auto threshold_it = threshold_id.begin();
        threshold_it != threshold_id.end(); ++dim_it, ++threshold_it) {
-    layers_.emplace_back(*threshold_it, *std::next(dim_it), *dim_it);
+    layers_.emplace_back(*threshold_it, *dim_it, *std::next(dim_it));
   }
 }
 
-Values Network::Forward_Prop(const VectorXd &start_vec) {
-  Values values;
-  values.in.resize(layers_.size());
-  values.out.resize(layers_.size());
-  VectorXd cur_vec = start_vec;
+std::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
+  vector<LayerValue> layer_values(layers_.size());
+  MatrixXd cur_mat = start_mat;
   for (size_t i = 0; i < layers_.size(); ++i) {
-    values.in[i] = cur_vec;
-    cur_vec = layers_[i].apply(cur_vec);
-    values.out[i] = cur_vec;
-    cur_vec = Threshold_Func::create(threshold_id_[i]).apply(cur_vec);
+    layer_values[i].in = cur_mat;
+    cur_mat = layers_[i].apply_linear(cur_mat);
+    layer_values[i].out = cur_mat;
+    cur_mat = layers_[i].apply_threshold(cur_mat);
   }
-  return values;
+  return layer_values;
 }
 
-VectorXd Network::Apply(const VectorXd &start_vec) {
-  auto cur_vec = start_vec;
+VectorXd Network::Calculate(const VectorXd &start_vec) const {
+  auto cur_mat = start_vec;
   for (size_t i = 0; i < layers_.size(); ++i) {
-    cur_vec = layers_[i].apply(cur_vec);
-    cur_vec = Threshold_Func::create(threshold_id_[i]).apply(cur_vec);
+    cur_mat = layers_[i].apply_linear(cur_mat);
+    cur_mat = layers_[i].apply_threshold(cur_mat);
   }
-  return cur_vec;
+  return cur_mat;
 }
 
-VectorXd Network::Back_Prop(const vector<Values> &values,
-                            const MatrixXd &reference,
-                            const Score_Func &score_func, double step) {
-  const auto func = Threshold_Func::create(threshold_id_.back());
-  MatrixXd u(reference.rows(), reference.cols());
-  for (int i = 0; i < u.cols(); ++i) {
-    u.col(i) =
-        score_func.gradient(func.apply(values[i].out.back()), reference.col(i));
+void Network::Train(const MatrixXd &start_batch, const MatrixXd &target,
+                    const ScoreFunc &score_func, size_t max_epochs,
+                    double accuracy) {
+  size_t epochs = 0;
+  size_t bias = std::numeric_limits<size_t>::max();
+  while (epochs != max_epochs && bias > accuracy) {
+    bias =
+        Back_Prop(Forward_Prop(start_batch), target, score_func, 1. / epochs);
+    ++epochs;
   }
+}
 
-  int dim = values.size();
-  VectorXd grad;
+double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
+                          const MatrixXd &target, const ScoreFunc &score_func,
+                          double step) {
+  auto grad = GetGradMatrix(layer_values.back().out, target, score_func);
   for (int i = layers_.size() - 1; i >= 0; --i) {
-    VectorXd delta_in = VectorXd::Zero(values[0].in[i].rows());
-    VectorXd delta_out = VectorXd::Zero(values[0].out[i].rows());
-    MatrixXd new_u(layers_[i].Get_Dim(), u.cols());
-    grad = VectorXd::Zero(u.rows());
-    for (int j = 0; j < dim; ++j) {
-      delta_in += values[j].in[i] / dim;
-      delta_out += values[j].out[i] / dim;
-      grad += u.col(j) / dim;
-      new_u.col(j) = layers_[i].gradx(u.col(j), delta_out);
-    }
-    layers_[i].apply_gradA(layers_[i].gradA(delta_in, grad, delta_out), step);
-    layers_[i].apply_gradb(layers_[i].gradb(grad, delta_out), step);
-    u = new_u;
+    layers_[i].apply_gradA(layer_values[i].in, grad, layer_values[i].out, step);
+    layers_[i].apply_gradb(grad, layer_values[i].out, step);
+    grad = layers_[i].gradx(grad, layer_values[i].out);
   }
-
-  return grad;
-}
-VectorXd Network::Back_Prop_SGD(const MatrixXd &start_batch,
-                                const MatrixXd &reference,
-                                const Score_Func &score_func, int iter_num) {
-  auto rand_ind = index_generator_() % start_batch.cols();
-  auto values = {Forward_Prop(start_batch.col(rand_ind))};
-  return Back_Prop(values, reference.col(rand_ind), score_func, 1.0 / iter_num);
-}
-void Network::TrainSGD(const MatrixXd &start_batch, const MatrixXd &reference,
-                       const Score_Func &score_func, double needed_accuracy,
-                       int max_epochs) {
-  int epochs = 0;
-  double cur_acc = std::numeric_limits<double>::infinity();
-  vector<Values> values(start_batch.cols());
-  while (epochs != max_epochs && cur_acc >= needed_accuracy) {
-    for (int i = 0; i < start_batch.cols(); ++i) {
-      values[i] = Forward_Prop(start_batch.col(i));
-    }
-    cur_acc = Back_Prop(values, reference, score_func, epochs)
-                  .unaryExpr([](double x) { return abs(x); })
-                  .maxCoeff();
-    ++epochs;
-  }
+  return VectorXd::Ones(grad.rows()).transpose() *
+         (grad * VectorXd::Ones(grad.cols()) / grad.cols())
+             .unaryExpr([](double el) { return abs(el); });
 }
 
-void Network::TrainBGD(const MatrixXd &start_batch, const MatrixXd &reference,
-                       const Score_Func &score_func, int cols_in_minibatch,
-                       double needed_accuracy, int max_epochs) {
-  int epochs = 0;
-  double cur_acc = 1e9;
-  vector<Values> values(start_batch.cols());
-  auto cur_batch = start_batch;
-  auto cur_ref = reference;
-  while (epochs != max_epochs && cur_acc >= needed_accuracy) {
-    for (int i = 0; i < start_batch.cols(); ++i) {
-      values[i] = Forward_Prop(cur_batch.col(i));
-    }
-    cur_acc = Back_Prop(values, cur_ref, score_func, epochs)
-                  .unaryExpr([](double x) { return abs(x); })
-                  .maxCoeff();
-    cur_batch *= GetRandMat(cur_batch.cols());
-    cur_ref *= GetRandMat(cur_ref.cols());
-    ++epochs;
+MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
+                                const ScoreFunc &score_func) const {
+  MatrixXd res(target.rows(), target.cols());
+  auto final_mat = layers_.back().apply_threshold(input);
+  for (Index i = 0; i < res.cols(); ++i) {
+    res.col(i) = score_func.gradient(final_mat.col(i), target.col(i));
   }
-}
-
-PermutationMatrix Network::GetRandMat(int cols) {
-  PermutationMatrix perm(cols);
-  perm.setIdentity();
-  std::shuffle(perm.indices().data(),
-               perm.indices().data() + perm.indices().size(), index_generator_);
-  return perm;
+  return res;
 }
 
 } // namespace network

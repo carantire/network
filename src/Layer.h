@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Threshold_Func.h"
+#include "ThresholdFunc.h"
 #include <Eigen/Dense>
 #include <EigenRand/EigenRand>
 #include <utility>
@@ -11,29 +11,31 @@ class Layer {
 public:
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
-  Layer(Threshold_Id id, int rows, int columns);
+  using Index = Eigen::Index;
 
-  VectorXd apply(const VectorXd &x) const; // vector of values
-  MatrixXd derive(const VectorXd &vec)
-      const; // vec is a matrix of y_i = (Ax + b)_i - result of apply
+  Layer(ThresholdId id, Index in_size, Index out_size);
 
-  MatrixXd gradA(const VectorXd &x, const VectorXd &u,
-                 const VectorXd &vec) const; // u is a gradient vector
+  MatrixXd apply_linear(const MatrixXd &values) const;
 
-  MatrixXd gradb(const VectorXd &u, const VectorXd &vec) const;
+  MatrixXd apply_threshold(const MatrixXd &value) const;
 
-  VectorXd gradx(const VectorXd &u, const VectorXd &vec) const;
+  MatrixXd derive(const VectorXd &applied_values) const;
 
-  void apply_gradA(const MatrixXd &grad, double step);
+  MatrixXd derive_mat(const MatrixXd &applied_values,
+                      const MatrixXd &grad) const;
 
-  void apply_gradb(const VectorXd &grad, double step);
+  MatrixXd gradx(const MatrixXd &grad, const MatrixXd &applied_values) const;
 
-  int Get_Dim();
+  void apply_gradA(const MatrixXd &values, const MatrixXd &grad,
+                   const MatrixXd &applied_values, double step);
+
+  void apply_gradb(const MatrixXd &grad, const MatrixXd &applied_values,
+                   double step);
 
 private:
-  static MatrixXd getNormal(int rows, int columns);
-  static inline Eigen::Rand::Vmt19937_64 urng = 1;
-  Threshold_Func threshold_func_;
+  static MatrixXd getNormal(Index rows, Index columns);
+
+  ThresholdFunc ThresholdFunc_;
   MatrixXd A_;
   VectorXd b_;
 };
