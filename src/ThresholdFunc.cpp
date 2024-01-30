@@ -23,12 +23,16 @@ ThresholdFunc ThresholdFunc::create(ThresholdId threshold) {
 }
 
 double ThresholdFunc::evaluate_0(double x) const {
-  assert(evaluate_0_ && "Empty evaluate_0 method!");
+  if (!evaluate_0_) {
+    throw std::bad_function_call();
+  }
   return evaluate_0_(x);
 }
 
 double ThresholdFunc::evaluate_1(double x) const {
-  assert(evaluate_1_ && "Empty evaluate_1 method!");
+  if (!evaluate_1_) {
+    throw std::bad_function_call();
+  }
   return evaluate_1_(x);
 }
 
@@ -40,5 +44,5 @@ MatrixXd ThresholdFunc::derive(const MatrixXd &layer_val) const {
   return layer_val.unaryExpr([this](double x) { return evaluate_1(x); });
 }
 
-bool ThresholdFunc::check_empty(){return evaluate_0_ && evaluate_1_;};
+bool ThresholdFunc::check_empty() { return evaluate_0_ && evaluate_1_; };
 } // namespace network

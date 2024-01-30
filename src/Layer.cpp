@@ -59,8 +59,12 @@ RandGen &getUrng() {
 }
 
 MatrixXd Layer::getNormal(Index rows, Index columns) {
-  assert(rows > 0 && "rows must be positive!");
-  assert(columns > 0 && "columns must be positive!");
+  if (rows < 0) {
+    throw std::invalid_argument("rows must be positive!");
+  }
+  if (columns < 0) {
+    throw std::invalid_argument("columns must be positive!");
+  }
   return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng());
 }
 
