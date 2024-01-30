@@ -4,24 +4,24 @@
 namespace network {
 class Test {
 public:
-  void thres_constructor_test();
-  void thres_apply_test();
-  void thres_derive_test();
+  static void thres_constructor_test();
+  static void thres_apply_test();
+  static void thres_derive_test();
 
-  void score_constructor_test();
-  void score_gradient_test();
-  void score_score_test();
+  static void score_constructor_test();
+  static void score_gradient_test();
+  static void score_score_test();
 
-  void layer_constructor_test();
-  void layer_grad_test1();
-  void layer_grad_test2();
-  void layer_grad_test3();
+  static void layer_constructor_test();
+  static void layer_grad_test1();
+  static void layer_grad_test2();
+  static void layer_grad_test3();
 
-  void network_constructor_test();
-  void network_train_test();
-  void network_calc_test();
+  static void network_constructor_test();
+  static void network_train_test();
+  static void network_calc_test();
 
-  void run_all_tests();
+  static void run_all_tests();
 };
 
 } // namespace network

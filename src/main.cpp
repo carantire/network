@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "except.h"
 #include "tests.h"
 #include <EigenRand/EigenRand>
 #include <cassert>
@@ -7,10 +8,16 @@
 #include <iostream>
 #include <random>
 #include <utility>
-using namespace network;
 
 int main() {
-  Test test;
-  test.run_all_tests();
-  return 0;
+  using namespace network;
+  try {
+    Test::run_all_tests();
+    return 0;
+  } catch (const std::exception &exception) {
+    std::cerr << exception.what() << '\n';
+    return -1;
+  } catch (...) {
+    return -2;
+  }
 }

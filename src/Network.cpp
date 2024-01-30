@@ -14,6 +14,9 @@ using vector = Network::vector<LayerValue>;
 Network::Network(std::initializer_list<int> dimensions,
                  std::initializer_list<ThresholdId> threshold_id) {
   assert(dimensions.size() == threshold_id.size() + 1);
+  if (dimensions.size() != threshold_id.size() + 1) {
+    throw std::invalid_argument("Invalid network constructor input");
+  }
   layers_.reserve(dimensions.size() - 1);
   auto dim_it = dimensions.begin();
   for (auto threshold_it = threshold_id.begin();
@@ -35,6 +38,10 @@ std::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
 }
 
 VectorXd Network::Calculate(const VectorXd &start_vec) const {
+  if (start_vec.rows() != layers_.begin()->Get_Input_Dim()) {
+    throw std::invalid_argument(
+        "Vector size must coincide with first layer size");
+  }
   auto cur_mat = start_vec;
   for (size_t i = 0; i < layers_.size(); ++i) {
     cur_mat = layers_[i].apply_linear(cur_mat);
@@ -46,6 +53,10 @@ VectorXd Network::Calculate(const VectorXd &start_vec) const {
 void Network::Train(const MatrixXd &start_batch, const MatrixXd &target,
                     const ScoreFunc &score_func, size_t max_epochs,
                     double accuracy) {
+  if (start_batch.rows() != target.rows() ||
+      start_batch.cols() != target.cols()) {
+    throw std::length_error("Target size must coincide with batch size");
+  }
   size_t epochs = 0;
   size_t bias = std::numeric_limits<size_t>::max();
   while (epochs != max_epochs && bias > accuracy) {

@@ -32,6 +32,8 @@ public:
   void apply_gradb(const MatrixXd &grad, const MatrixXd &applied_values,
                    double step);
 
+  Index Get_Input_Dim() const;
+
 private:
   static MatrixXd getNormal(Index rows, Index columns);
 

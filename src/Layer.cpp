@@ -5,6 +5,7 @@
 #include "Layer.h"
 
 namespace network {
+using Index = Layer::Index;
 using VectorXd = Layer::VectorXd;
 using MatrixXd = Layer::MatrixXd;
 using RandGen = Eigen::Rand::Vmt19937_64;
@@ -62,5 +63,7 @@ MatrixXd Layer::getNormal(Index rows, Index columns) {
   assert(columns > 0 && "columns must be positive!");
   return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng());
 }
+
+Index Layer::Get_Input_Dim() const { return A_.cols(); };
 
 } // namespace network
