@@ -14,10 +14,7 @@ int main() {
   try {
     Test::run_all_tests();
     return 0;
-  } catch (const std::exception &exception) {
-    std::cerr << exception.what() << '\n';
-    return -1;
   } catch (...) {
-    return -2;
+    except::react();
   }
 }

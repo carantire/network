@@ -23,16 +23,12 @@ ThresholdFunc ThresholdFunc::create(ThresholdId threshold) {
 }
 
 double ThresholdFunc::evaluate_0(double x) const {
-  if (!evaluate_0_) {
-    throw std::bad_function_call();
-  }
+  assert(evaluate_0_ && "empty apply function");
   return evaluate_0_(x);
 }
 
 double ThresholdFunc::evaluate_1(double x) const {
-  if (!evaluate_1_) {
-    throw std::bad_function_call();
-  }
+  assert(evaluate_1_ && "empty derive function");
   return evaluate_1_(x);
 }
 
