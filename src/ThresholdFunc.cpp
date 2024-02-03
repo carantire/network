@@ -17,27 +17,21 @@ ThresholdFunc ThresholdFunc::create(ThresholdId threshold) {
     return ThresholdFunc::create<ThresholdId::Sigmoid>();
   case ThresholdId::ReLu:
     return ThresholdFunc::create<ThresholdId::ReLu>();
+  case ThresholdId::SoftMax:
+    return ThresholdFunc::create<ThresholdId::SoftMax>();
   default:
     return ThresholdFunc::create<ThresholdId::Sigmoid>();
   }
 }
 
-double ThresholdFunc::evaluate_0(double x) const {
-  assert(evaluate_0_ && "empty apply function");
-  return evaluate_0_(x);
-}
-
-double ThresholdFunc::evaluate_1(double x) const {
-  assert(evaluate_1_ && "empty derive function");
-  return evaluate_1_(x);
-}
-
 MatrixXd ThresholdFunc::apply(const MatrixXd &layer_val) const {
-  return layer_val.unaryExpr([this](double x) { return evaluate_0(x); });
+  assert(evaluate_0_ && "empty apply function");
+  return evaluate_0_(layer_val);
 }
 
 MatrixXd ThresholdFunc::derive(const MatrixXd &layer_val) const {
-  return layer_val.unaryExpr([this](double x) { return evaluate_1(x); });
+  assert(evaluate_1_ && "empty derive function");
+  return evaluate_1_(layer_val);
 }
 
 bool ThresholdFunc::check_empty() { return evaluate_0_ && evaluate_1_; };

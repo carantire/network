@@ -11,8 +11,6 @@ struct ScoreDatabase {
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
 
-  static VectorXd SoftMax(const VectorXd &vec);
-
   template <ScoreId> static double score(const VectorXd &, const VectorXd &);
 
   template <ScoreId>
@@ -25,14 +23,18 @@ struct ScoreDatabase {
   }
 
   template <>
-  inline VectorXd gradient<ScoreId::MSE>(const VectorXd &x,
-                                         const VectorXd &reference) {
-    return 2.0 * (x - reference);
+  inline VectorXd gradient<ScoreId::MSE>(const VectorXd &input,
+                                         const VectorXd &target) {
+    assert(input.rows() == target.rows() &&
+           "input and target must have same size");
+    return 2.0 * (input - target);
   }
 
   template <>
   inline double score<ScoreId::MAE>(const VectorXd &input,
                                     const VectorXd &target) {
+    assert(input.rows() == target.rows() &&
+           "input and target must have same size");
     return VectorXd::Ones(input.rows()).transpose() *
            (input - target).unaryExpr([](double el) { return abs(el); });
   }
@@ -40,6 +42,8 @@ struct ScoreDatabase {
   template <>
   inline VectorXd gradient<ScoreId::MAE>(const VectorXd &input,
                                          const VectorXd &target) {
+    assert(input.rows() == target.rows() &&
+           "input and target must have same size");
     return (input - target).unaryExpr([](double el) {
       return el > 0 ? 1.0 : -1.0;
     });
@@ -47,17 +51,18 @@ struct ScoreDatabase {
   template <>
   inline double score<ScoreId::CrossEntropy>(const VectorXd &input,
                                              const VectorXd &target) {
-    return -SoftMax(target).transpose() *
-           SoftMax(input).unaryExpr([](double el) { return log(el); });
+    assert(input.rows() == target.rows() &&
+           "input and target must have same size");
+    return -target.transpose() *
+           input.unaryExpr([](double el) { return log(el); });
   }
   template <>
   inline VectorXd gradient<ScoreId::CrossEntropy>(const VectorXd &input,
                                                   const VectorXd &target) {
-    double exp_sum = VectorXd::Ones(input.rows()).transpose() *
-                     input.unaryExpr([](double el) { return exp(el); });
-    auto const_vec = input.unaryExpr([](double el) { return exp(el); }) -
-                     exp_sum * VectorXd::Ones(input.rows());
-    return SoftMax(target).asDiagonal() * const_vec / exp_sum;
+    assert(input.rows() == target.rows() &&
+           "input and target must have same size");
+    return -target.cwiseProduct(
+        input.unaryExpr([](double el) { return 1.0 / el; }));
   }
 };
 
@@ -95,11 +100,6 @@ double ScoreFunc::score(const VectorXd &input, const VectorXd &target) const {
 VectorXd ScoreFunc::gradient(const VectorXd &input,
                              const VectorXd &target) const {
   return gradient_func_(input, target);
-}
-
-VectorXd ScoreDatabase::SoftMax(const VectorXd &vec) {
-  VectorXd exp_vec = vec.unaryExpr([](double el) { return exp(el); });
-  return exp_vec / (VectorXd::Ones(exp_vec.rows()).transpose() * exp_vec);
 }
 
 bool ScoreFunc::check_empty() { return score_func_ && gradient_func_; }

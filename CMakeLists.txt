@@ -3,5 +3,9 @@ project(network_project)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(network_project src/main.cpp src/ThresholdFunc.cpp src/Layer.cpp src/ScoreFunc.cpp src/Network.cpp src/tests.cpp src/except.cpp)
-target_include_directories(network_project PRIVATE eigen EigenRand)
+find_package(MNIST PATHS mnist/)
+
+add_executable(network_project src/main.cpp src/ThresholdFunc.cpp src/Layer.cpp src/ScoreFunc.cpp src/Network.cpp src/tests.cpp src/except.cpp src/Mnist_test.cpp src/Mnist_test.h)
+target_include_directories(network_project PRIVATE eigen EigenRand ${MNIST_INCLUDE_DIR})
+target_compile_definitions(network_project PRIVATE MNIST_DATA_LOCATION="${MNIST_DATA_DIR}")
+

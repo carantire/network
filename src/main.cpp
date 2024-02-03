@@ -1,3 +1,4 @@
+#include "Mnist_test.h"
 #include "Network.h"
 #include "except.h"
 #include "tests.h"
@@ -13,8 +14,10 @@ int main() {
   using namespace network;
   try {
     Test::run_all_tests();
-    return 0;
+
   } catch (...) {
     except::react();
   }
+  Mnist_test::test();
+  return 0;
 }

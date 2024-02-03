@@ -73,13 +73,13 @@ void Test::network_constructor_test() {
   auto net = Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid});
 }
 void Test::network_train_test() {
-  auto net = Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid});
+  auto net = Network({2, 3, 4, 5, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::SoftMax});
   MatrixXd batch(2, 3);
   MatrixXd target(4, 3);
-  net.Train(batch, target, ScoreFunc::create(ScoreId::MAE), 42, 0.5);
+  net.Train(batch, target, ScoreFunc::create(ScoreId::CrossEntropy), 42, 0.5);
 }
 void Test::network_calc_test() {
-  auto net = Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid});
+  auto net = Network({2, 3, 4, 2, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::Sigmoid});
   VectorXd batch(2);
   batch << 1, 2;
   net.Calculate(batch);

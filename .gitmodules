@@ -5,3 +5,6 @@
 	path = eigen
 	url = https://gitlab.com/libeigen/eigen
 	branch = 3.4
+[submodule "mnist"]
+	path = mnist
+	url = https://github.com/wichtounet/mnist

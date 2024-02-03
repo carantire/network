@@ -41,6 +41,11 @@ MatrixXd Layer::gradx(const MatrixXd &grad, const MatrixXd &applied_val) const {
 
 void Layer::apply_gradA(const MatrixXd &values, const MatrixXd &grad,
                         const MatrixXd &applied_val, double step) {
+  assert(grad.cols() == applied_val.cols() &&
+         "applied_values and gradient must have same cols");
+  assert(grad.rows() == applied_val.rows() &&
+         "applied_values and gradient must have same rows");
+  assert(values.cols() == grad.cols() && "all matrices must have same cols");
   auto diff =
       derive_mat(applied_val, grad) * values.transpose() / applied_val.cols();
   A_ -= step * diff;

@@ -6,7 +6,6 @@
 #include "ThresholdFunc.h"
 
 namespace network {
-
 using VectorXd = Network::VectorXd;
 using MatrixXd = Network::MatrixXd;
 using vector = Network::vector<LayerValue>;
@@ -52,8 +51,7 @@ void Network::Train(const MatrixXd &start_batch, const MatrixXd &target,
   size_t epochs = 0;
   size_t bias = std::numeric_limits<size_t>::max();
   while (epochs != max_epochs && bias > accuracy) {
-    bias =
-        Back_Prop(Forward_Prop(start_batch), target, score_func, 1. / epochs);
+    bias = Back_Prop(Forward_Prop(start_batch), target, score_func, 1./(1 + epochs));
     ++epochs;
   }
 }
