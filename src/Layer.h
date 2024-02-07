@@ -34,6 +34,8 @@ public:
 
   Index Get_Input_Dim() const;
 
+  void Print_Mat() const;
+
 private:
   static MatrixXd getNormal(Index rows, Index columns);
 

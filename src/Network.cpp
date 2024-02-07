@@ -1,7 +1,6 @@
 //
 // Created by Denis Ryapolov on 06.01.2024.
 //
-
 #include "Network.h"
 #include "ThresholdFunc.h"
 
@@ -26,6 +25,7 @@ std::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
   MatrixXd cur_mat = start_mat;
   for (size_t i = 0; i < layers_.size(); ++i) {
     layer_values[i].in = cur_mat;
+//    std::cout << i << '\n' << cur_mat.leftCols(2).transpose().leftCols(2) << '\n';
     cur_mat = layers_[i].apply_linear(cur_mat);
     layer_values[i].out = cur_mat;
     cur_mat = layers_[i].apply_threshold(cur_mat);
@@ -51,7 +51,7 @@ void Network::Train(const MatrixXd &start_batch, const MatrixXd &target,
   size_t epochs = 0;
   size_t bias = std::numeric_limits<size_t>::max();
   while (epochs != max_epochs && bias > accuracy) {
-    bias = Back_Prop(Forward_Prop(start_batch), target, score_func, 1./(1 + epochs));
+    bias = Back_Prop(Forward_Prop(start_batch), target, score_func, 10);
     ++epochs;
   }
 }
@@ -63,6 +63,7 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
   for (int i = layers_.size() - 1; i >= 0; --i) {
     layers_[i].apply_gradA(layer_values[i].in, grad, layer_values[i].out, step);
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
+//    std::cout << i  << '\n' << grad.leftCols(2).transpose().leftCols(2).transpose() << '\n';
     grad = layers_[i].gradx(grad, layer_values[i].out);
   }
   return VectorXd::Ones(grad.rows()).transpose() *
@@ -77,6 +78,7 @@ MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
   for (Index i = 0; i < res.cols(); ++i) {
     res.col(i) = score_func.gradient(final_mat.col(i), target.col(i));
   }
+//    std::cout << res << '\n';
   return res;
 }
 

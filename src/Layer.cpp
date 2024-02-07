@@ -3,6 +3,7 @@
 //
 
 #include "Layer.h"
+#include <iostream>
 
 namespace network {
 using Index = Layer::Index;
@@ -23,6 +24,8 @@ MatrixXd Layer::apply_threshold(const MatrixXd &value) const {
 }
 
 MatrixXd Layer::derive(const VectorXd &vec) const {
+  //  std::cout  <<
+  //  ThresholdFunc_.derive(vec).transpose().leftCols(10).transpose() << "\n\n";
   return ThresholdFunc_.derive(vec).asDiagonal();
 }
 
@@ -31,11 +34,19 @@ MatrixXd Layer::derive_mat(const MatrixXd &applied_values_mat,
   MatrixXd res(applied_values_mat.rows(), applied_values_mat.cols());
   for (Index i = 0; i < res.cols(); ++i) {
     res.col(i) = derive(applied_values_mat.col(i)) * grad.col(i);
+//    assert(res.col(i).norm() > 1e-50);
+    res.col(i) /= res.col(i).norm();
+    std::cout << derive(applied_values_mat.col(i)).array().maxCoeff() << " " << grad.col(i).array().maxCoeff()<< '\n';
+    //    std::cout <<
+    //    derive(applied_values_mat.col(i)).leftCols(5).transpose().leftCols(5).transpose()
+    //    << "\n\n";
   }
   return res;
 }
 
 MatrixXd Layer::gradx(const MatrixXd &grad, const MatrixXd &applied_val) const {
+  //  std::cout << derive_mat(applied_val,
+  //  grad).leftCols(2).transpose().leftCols(2).transpose() << '\n';
   return A_.transpose() * derive_mat(applied_val, grad);
 }
 
@@ -47,14 +58,15 @@ void Layer::apply_gradA(const MatrixXd &values, const MatrixXd &grad,
          "applied_values and gradient must have same rows");
   assert(values.cols() == grad.cols() && "all matrices must have same cols");
   auto diff =
-      derive_mat(applied_val, grad) * values.transpose() / applied_val.cols();
+      derive_mat(applied_val, grad) * (values.transpose() / applied_val.cols());
+  //  std::cout << diff << "\n\n";
   A_ -= step * diff;
 }
 
 void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
                         double step) {
   auto diff = derive_mat(applied_val, grad) *
-              VectorXd::Ones(applied_val.cols()) / applied_val.cols();
+              (VectorXd::Ones(applied_val.cols()) / applied_val.cols());
   b_ -= step * diff;
 }
 
@@ -66,9 +78,13 @@ RandGen &getUrng() {
 MatrixXd Layer::getNormal(Index rows, Index columns) {
   assert(rows > 0 && "rows must be positive");
   assert(columns > 0 && "columns must be positive");
-  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng());
+  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng()) / 100.;
 }
 
 Index Layer::Get_Input_Dim() const { return A_.cols(); };
+
+void Layer::Print_Mat() const {
+  std::cout << A_.leftCols(10).transpose().leftCols(10).transpose() << '\n';
+}
 
 } // namespace network

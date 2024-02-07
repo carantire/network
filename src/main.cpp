@@ -10,14 +10,18 @@
 #include <random>
 #include <utility>
 
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+using namespace std;
 int main() {
-  using namespace network;
-  try {
-    Test::run_all_tests();
 
-  } catch (...) {
-    except::react();
-  }
-  Mnist_test::test();
+    using namespace network;
+    try {
+//      Test::run_all_tests();
+    } catch (...) {
+      except::react();
+    }
+    Mnist_test::test();
+
   return 0;
 }

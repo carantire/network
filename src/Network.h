@@ -3,6 +3,7 @@
 #include "Layer.h"
 #include "ScoreFunc.h"
 #include <Eigen/Eigen>
+#include <iostream>
 
 namespace network {
 
@@ -29,6 +30,8 @@ public:
   void Train(const MatrixXd &start_batch, const MatrixXd &target,
              const ScoreFunc &score_func, size_t max_epochs, double accuracy);
 
+  vector<Layer> layers_;
+
 private:
   vector<LayerValue> Forward_Prop(const MatrixXd &start_vec) const;
   double Back_Prop(const vector<LayerValue> &layer_values,
@@ -37,6 +40,6 @@ private:
   MatrixXd GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
                          const ScoreFunc &score_func) const;
 
-  vector<Layer> layers_;
+
 };
 } // namespace network

@@ -3,6 +3,7 @@
 #include <Eigen/Eigen>
 #include <EigenRand/EigenRand>
 #include <cmath>
+#include <iostream>
 
 namespace network {
 
@@ -11,6 +12,7 @@ enum class ThresholdId { Sigmoid, ReLu, SoftMax };
 struct ThresholdDatabase {
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
+  using Index = Eigen::Index;
 
   template <ThresholdId> static double evaluate_0(double);
 
@@ -21,11 +23,19 @@ struct ThresholdDatabase {
   template <ThresholdId> static MatrixXd evaluate_1_mat(const MatrixXd &);
 
   template <> inline double evaluate_0<ThresholdId::Sigmoid>(double x) {
-    return 1. / (1. + std::exp(-x));
+    std::cout << x << std::endl;
+    assert(std::isfinite(x));
+    double result = 1 / (1 + std::exp(x));
+    assert(std::isfinite(result));
+    return result;
   }
 
   template <> inline double evaluate_1<ThresholdId::Sigmoid>(double x) {
-    return 1. / (std::exp(-x) + std::exp(x) + 2.);
+    std::cout << x << std::endl;
+    assert(std::isfinite(x));
+    double result = 1. / (std::exp(-x) + std::exp(x) + 2.);
+    assert(std::isfinite(result));
+    return result;
   }
 
   template <> inline double evaluate_0<ThresholdId::ReLu>(double x) {
@@ -64,10 +74,12 @@ struct ThresholdDatabase {
   inline MatrixXd evaluate_0_mat<ThresholdId::SoftMax>(const MatrixXd &mat) {
     MatrixXd res(mat.rows(), mat.cols());
     for (int i = 0; i < mat.cols(); ++i) {
-      VectorXd exp_vec =
-          mat.col(i).unaryExpr([](double el) { return exp(el); });
-      res.col(i) =
-          exp_vec / (VectorXd::Ones(exp_vec.rows()).transpose() * exp_vec);
+      for (int j = 0; j < mat.rows(); ++j) {
+        res(j, i) = 1. / (VectorXd::Ones(mat.rows()).transpose() *
+                          mat.col(i).unaryExpr([&](double el) {
+                            return exp(std::min(28., el - mat(j, i)));
+                          }));
+      }
     }
     return res;
   }
@@ -75,12 +87,14 @@ struct ThresholdDatabase {
   template <>
   inline MatrixXd evaluate_1_mat<ThresholdId::SoftMax>(const MatrixXd &mat) {
     MatrixXd res(mat.rows(), mat.cols());
-    for (int i = 0; i < mat.cols(); ++i) {
-      VectorXd exp_col =
-          mat.col(i).unaryExpr([](double el) { return exp(el); });
-      double exp_sum = VectorXd::Ones(mat.rows()).transpose() * exp_col;
-      VectorXd const_vec = exp_sum * VectorXd::Ones(mat.rows()) - exp_col;
-      res.col(i) = const_vec.cwiseProduct(exp_col) / (exp_sum * exp_sum);
+    for (Index i = 0; i < mat.cols(); ++i) {
+      for (int j = 0; j < mat.rows(); ++j) {
+        double exp_diff_sum = 1. / (VectorXd::Ones(mat.rows()).transpose() *
+                                    mat.col(i).unaryExpr([&](double el) {
+                                      return exp(std::min(28., el - mat(j, i)));
+                                    }));
+        res(j, i) = exp_diff_sum * (1 - exp_diff_sum);
+      }
     }
     return res;
   }
