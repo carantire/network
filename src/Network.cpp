@@ -25,9 +25,9 @@ std::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
   MatrixXd cur_mat = start_mat;
   for (size_t i = 0; i < layers_.size(); ++i) {
     layer_values[i].in = cur_mat;
-//    std::cout << i << '\n' << cur_mat.leftCols(2).transpose().leftCols(2) << '\n';
     cur_mat = layers_[i].apply_linear(cur_mat);
     layer_values[i].out = cur_mat;
+    assert(std::isfinite(layer_values[i].out.array().maxCoeff()));
     cur_mat = layers_[i].apply_threshold(cur_mat);
   }
   return layer_values;
@@ -45,13 +45,12 @@ VectorXd Network::Calculate(const VectorXd &start_vec) const {
 
 void Network::Train(const MatrixXd &start_batch, const MatrixXd &target,
                     const ScoreFunc &score_func, size_t max_epochs,
-                    double accuracy) {
+                    double step) {
   assert(start_batch.cols() == target.cols() &&
          "Target size must coincide with batch size");
   size_t epochs = 0;
-  size_t bias = std::numeric_limits<size_t>::max();
-  while (epochs != max_epochs && bias > accuracy) {
-    bias = Back_Prop(Forward_Prop(start_batch), target, score_func, 10);
+  while (epochs != max_epochs) {
+    Back_Prop(Forward_Prop(start_batch), target, score_func, step);
     ++epochs;
   }
 }
@@ -63,7 +62,6 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
   for (int i = layers_.size() - 1; i >= 0; --i) {
     layers_[i].apply_gradA(layer_values[i].in, grad, layer_values[i].out, step);
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
-//    std::cout << i  << '\n' << grad.leftCols(2).transpose().leftCols(2).transpose() << '\n';
     grad = layers_[i].gradx(grad, layer_values[i].out);
   }
   return VectorXd::Ones(grad.rows()).transpose() *
@@ -77,8 +75,8 @@ MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
   auto final_mat = layers_.back().apply_threshold(input);
   for (Index i = 0; i < res.cols(); ++i) {
     res.col(i) = score_func.gradient(final_mat.col(i), target.col(i));
+    assert(res.col(i).norm() > 0);
   }
-//    std::cout << res << '\n';
   return res;
 }
 

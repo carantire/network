@@ -14,7 +14,6 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using namespace std;
 int main() {
-
     using namespace network;
     try {
 //      Test::run_all_tests();
@@ -22,6 +21,5 @@ int main() {
       except::react();
     }
     Mnist_test::test();
-
   return 0;
 }

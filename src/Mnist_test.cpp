@@ -1,4 +1,5 @@
 #include "Mnist_test.h"
+#include <algorithm>
 
 using MatrixXd = Eigen::MatrixXd;
 using VectorXd = Eigen::VectorXd;
@@ -8,7 +9,7 @@ MatrixXd Mnist_test::MatConstructor(const vector<vector<unsigned char>> &mat,
   MatrixXd res(mat[0].size(), batch_size);
   for (int i = start_ind; i < start_ind + batch_size; ++i) {
     for (int j = 0; j < mat[0].size(); ++j) {
-      res(j, i - start_ind) = double(mat[i][j])/255;
+      res(j, i - start_ind) = double(mat[i][j]) / 255.;
     }
   }
   return res;
@@ -35,38 +36,45 @@ void Mnist_test::test() {
           MNIST_DATA_LOCATION);
   std::cout << "Nbr of training images = " << dataset.training_images.size()
             << std::endl;
-  std::cout << "Nbr of training images = " << dataset.training_images.size()
-            << std::endl;
   std::cout << "Nbr of training labels = " << dataset.training_labels.size()
             << std::endl;
   std::cout << "Nbr of test images = " << dataset.test_images.size()
             << std::endl;
   std::cout << "Nbr of test labels = " << dataset.test_labels.size()
             << std::endl;
+
   Network net({784, 256, 10},
               {ThresholdId::ReLu, ThresholdId::Sigmoid});
-  for (int epoch = 0; epoch < 1; ++epoch) {
+
+  for (int epoch = 0; epoch < 10; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
-//    net.layers_[0].Print_Mat();
     std::cout << '\n';
     for (int k = 0; k < 1000; ++k) {
-      int batch_size = 1;
+      if (k % 100 == 0) {
+        std::cout << k << " vectors trained" << '\n';
+      }
+      int batch_size = 60;
       int start_ind = k * batch_size;
       MatrixXd input =
           MatConstructor(dataset.training_images, start_ind, batch_size);
       MatrixXd target =
           OutConstructor(dataset.training_labels, start_ind, batch_size);
-
-      net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 1, 0);
+      net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 1,
+                0.1 / (epoch + 1));
     }
-//    net.layers_[0].Print_Mat();
+
     int correct = 0;
-//    for (int i = 0; i < 10000; ++i) {
-//      auto in = MatConstructor(dataset.test_images, i, 1);
-//      auto res = net.Calculate(in).array();
-//      int max_ind = std::max_element(res.begin(), res.end()) - res.begin();
-//      correct += max_ind == dataset.test_labels[i];
-//    }
+    std::cout << '\n';
+    for (int i = 0; i < 10000; ++i) {
+      if (i % 1000 == 0) {
+        std::cout << i << " correct out of " << correct << '\n';
+      }
+      auto in = MatConstructor(dataset.test_images, i, 1);
+      auto res = net.Calculate(in);
+      int max_ind;
+      double max_val = res.maxCoeff(&max_ind);
+      correct += max_ind == dataset.test_labels[i];
+    }
     std::cout << "Correct results out of 10000: " << correct << '\n';
   }
 }

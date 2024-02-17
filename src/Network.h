@@ -39,7 +39,5 @@ private:
                    double step);
   MatrixXd GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
                          const ScoreFunc &score_func) const;
-
-
 };
 } // namespace network
