@@ -16,6 +16,7 @@ Layer::Layer(ThresholdId id, Index in_size, Index out_size)
       A_(getNormal(out_size, in_size)), b_(getNormal(out_size, 1)) {}
 
 MatrixXd Layer::apply_linear(const MatrixXd &x) const {
+
   return (A_ * x + b_ * VectorXd::Ones(x.cols()).transpose()).eval();
 }
 
@@ -24,6 +25,7 @@ MatrixXd Layer::apply_threshold(const MatrixXd &value) const {
 }
 
 MatrixXd Layer::derive(const VectorXd &vec) const {
+
   return ThresholdFunc_.derive(vec).asDiagonal();
 }
 
@@ -59,6 +61,7 @@ void Layer::apply_gradA(const MatrixXd &values, const MatrixXd &grad,
   assert(diff.rows() == A_.rows());
 
   A_ += step * diff;
+
 }
 
 void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
@@ -78,11 +81,7 @@ MatrixXd Layer::getNormal(Index rows, Index columns) {
   assert(rows > 0 && "rows must be positive");
   assert(columns > 0 && "columns must be positive");
   MatrixXd A(rows, columns);
-  static std::mt19937 rng(std::random_device{}());
-  static std::normal_distribution<> nd(0.0, sqrt(2.0 / (columns)));
-
-  A = A.unaryExpr([](double dummy) { return nd(rng); });
-  return A;
+  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng())/10.;
 }
 
 Index Layer::Get_Input_Dim() const { return A_.cols(); };
