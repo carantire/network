@@ -49,18 +49,18 @@ void Mnist_test::test() {
   for (int epoch = 0; epoch < 10; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
     std::cout << '\n';
-    for (int k = 0; k < 1000; ++k) {
-      if (k % 100 == 0) {
-        std::cout << k << " vectors trained" << '\n';
-      }
-      int batch_size = 60;
+    for (int k = 0; k < 2000; ++k) {
+//      if (k % 100 == 0) {
+//        std::cout << k << " vectors trained" << '\n';
+//      }
+      int batch_size = 30;
       int start_ind = k * batch_size;
       MatrixXd input =
           MatConstructor(dataset.training_images, start_ind, batch_size);
       MatrixXd target =
           OutConstructor(dataset.training_labels, start_ind, batch_size);
       net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 1,
-                0.1 / (epoch + 1));
+                0.15/(1 + epoch));
     }
 
     int correct = 0;
@@ -76,5 +76,19 @@ void Mnist_test::test() {
       correct += max_ind == dataset.test_labels[i];
     }
     std::cout << "Correct results out of 10000: " << correct << '\n';
+
+//    int correct = 0;
+//    std::cout << '\n';
+//    for (int i = 0; i < 60000; ++i) {
+//      if (i % 10000 == 0) {
+//        std::cout << i << " correct out of " << correct << '\n';
+//      }
+//      auto in = MatConstructor(dataset.training_images, i, 1);
+//      auto res = net.Calculate(in);
+//      int max_ind;
+//      double max_val = res.maxCoeff(&max_ind);
+//      correct += max_ind == dataset.training_labels[i];
+//    }
+//    std::cout << "Correct results out of 60000: " << correct << '\n';
   }
 }

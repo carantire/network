@@ -24,21 +24,15 @@ MatrixXd Layer::apply_threshold(const MatrixXd &value) const {
   return ThresholdFunc_.apply(value);
 }
 
-MatrixXd Layer::derive(const VectorXd &vec) const {
-
-  return ThresholdFunc_.derive(vec).asDiagonal();
+MatrixXd Layer::derive(const MatrixXd &applied_values) const {
+  //  std::cout << ThresholdFunc_.derive(vec).rows() << " " <<
+  //  ThresholdFunc_.derive(vec).cols() << '\n';
+  return ThresholdFunc_.derive(applied_values);
 }
 
 MatrixXd Layer::derive_mat(const MatrixXd &applied_values_mat,
                            const MatrixXd &grad) const {
-  MatrixXd res(applied_values_mat.rows(), applied_values_mat.cols());
-  for (Index i = 0; i < res.cols(); ++i) {
-    assert(std::isfinite(applied_values_mat.col(i).array().maxCoeff()) &&
-           "input is inf");
-    res.col(i) = derive(applied_values_mat.col(i)) * grad.col(i);
-    assert(res.col(i).norm() > 0);
-  }
-  return res.eval();
+  return (derive(applied_values_mat).cwiseProduct(grad)).eval();
 }
 
 MatrixXd Layer::gradx(const MatrixXd &grad, const MatrixXd &applied_val) const {
@@ -61,7 +55,6 @@ void Layer::apply_gradA(const MatrixXd &values, const MatrixXd &grad,
   assert(diff.rows() == A_.rows());
 
   A_ += step * diff;
-
 }
 
 void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
@@ -81,7 +74,7 @@ MatrixXd Layer::getNormal(Index rows, Index columns) {
   assert(rows > 0 && "rows must be positive");
   assert(columns > 0 && "columns must be positive");
   MatrixXd A(rows, columns);
-  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng())/10.;
+  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng()) / 12.;
 }
 
 Index Layer::Get_Input_Dim() const { return A_.cols(); };

@@ -19,7 +19,7 @@ public:
 
   MatrixXd apply_threshold(const MatrixXd &value) const;
 
-  MatrixXd derive(const VectorXd &applied_values) const;
+  MatrixXd derive(const MatrixXd &applied_values) const;
 
   MatrixXd derive_mat(const MatrixXd &applied_values,
                       const MatrixXd &grad) const;
@@ -36,11 +36,12 @@ public:
 
   void Print_Mat() const;
 
+  MatrixXd A_;
 private:
   static MatrixXd getNormal(Index rows, Index columns);
 
   ThresholdFunc ThresholdFunc_;
-  MatrixXd A_;
+
   VectorXd b_;
 };
 } // namespace network

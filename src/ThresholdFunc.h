@@ -7,7 +7,7 @@
 
 namespace network {
 
-enum class ThresholdId { Sigmoid, ReLu, SoftMax };
+enum class ThresholdId { Sigmoid, ReLu, SoftMax, Default };
 
 struct ThresholdDatabase {
   using MatrixXd = Eigen::MatrixXd;
@@ -27,18 +27,16 @@ struct ThresholdDatabase {
     //    assert(std::isfinite(x));
 
     double result = 1 / (1 + std::exp(x));
-//    std::cout << "eval: " << x << " " << result << std::endl;
+    //    std::cout << "eval: " << x << " " << result << std::endl;
 
     assert(std::isfinite(result));
     return result;
   }
 
   template <> inline double evaluate_1<ThresholdId::Sigmoid>(double x) {
-    //    std::cout << x << std::endl;
-    //    assert(std::isfinite(x));
+    assert(std::isfinite(x));
     double result = 1. / (std::exp(-x) + std::exp(x) + 2.);
-    //    assert(std::isfinite(result));
-//    std::cout << x << ' ' << result << std::endl;
+    assert(std::isfinite(result));
     return result;
   }
 
@@ -48,6 +46,15 @@ struct ThresholdDatabase {
 
   template <> inline double evaluate_1<ThresholdId::ReLu>(double x) {
     return x > 0 ? 1 : 0;
+  }
+  template <>
+  inline MatrixXd evaluate_0_mat<ThresholdId::Default>(const MatrixXd &mat) {
+    return mat;
+  }
+
+  template <>
+  inline MatrixXd evaluate_1_mat<ThresholdId::Default>(const MatrixXd &mat) {
+    return mat;
   }
 
   template <>
@@ -78,9 +85,10 @@ struct ThresholdDatabase {
   inline MatrixXd evaluate_0_mat<ThresholdId::SoftMax>(const MatrixXd &mat) {
     MatrixXd res(mat.rows(), mat.cols());
     for (int i = 0; i < mat.cols(); ++i) {
-      auto exp_vec = res.col(i).unaryExpr([](double el){return exp(el);});
-
-      res.col(i) = exp_vec / (exp_vec.transpose() * VectorXd::Ones(exp_vec.rows()));
+      VectorXd exp_vec =
+          mat.col(i).unaryExpr([](double el) { return exp(el); });
+      double exp_sum = exp_vec.transpose() * VectorXd::Ones(exp_vec.rows());
+      res.col(i) = exp_vec / exp_sum;
     }
     return res;
   }
@@ -89,11 +97,14 @@ struct ThresholdDatabase {
   inline MatrixXd evaluate_1_mat<ThresholdId::SoftMax>(const MatrixXd &mat) {
     MatrixXd res(mat.rows(), mat.cols());
     for (Index i = 0; i < mat.cols(); ++i) {
-      VectorXd exp_vec = res.col(i).unaryExpr([](double el){return exp(el);});
+      double max_coeff = mat.col(i).maxCoeff();
+      VectorXd exp_vec = mat.col(i).unaryExpr(
+          [max_coeff](double el) { return exp(el - max_coeff); });
       assert(std::isfinite(exp_vec.maxCoeff()));
       double exp_sum = exp_vec.transpose() * VectorXd::Ones(exp_vec.rows());
       VectorXd c = exp_sum * VectorXd::Ones(exp_vec.rows()) - exp_vec;
-      res.col(i) = c.cwiseProduct(exp_vec / (exp_sum*exp_sum));
+      res.col(i) = c.cwiseProduct(exp_vec / (exp_sum * exp_sum));
+      assert(isfinite(res.col(i).maxCoeff()));
     }
     return res;
   }

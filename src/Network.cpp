@@ -60,6 +60,7 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
                           double step) {
   auto grad = GetGradMatrix(layer_values.back().out, target, score_func);
   for (int i = layers_.size() - 1; i >= 0; --i) {
+    assert(isfinite(layers_[i].A_.maxCoeff()));
     layers_[i].apply_gradA(layer_values[i].in, grad, layer_values[i].out, step);
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
     grad = layers_[i].gradx(grad, layer_values[i].out);
@@ -75,7 +76,6 @@ MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
   auto final_mat = layers_.back().apply_threshold(input);
   for (Index i = 0; i < res.cols(); ++i) {
     res.col(i) = score_func.gradient(final_mat.col(i), target.col(i));
-    assert(res.col(i).norm() > 0);
   }
   return res;
 }
