@@ -72,11 +72,13 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
 
 MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
                                 const ScoreFunc &score_func) const {
-  MatrixXd res(target.rows(), target.cols());
+
   auto final_mat = layers_.back().apply_threshold(input);
-  for (Index i = 0; i < res.cols(); ++i) {
-    res.col(i) = score_func.gradient(final_mat.col(i), target.col(i));
-  }
+//  for (Index i = 0; i < res.cols(); ++i) {
+//    res.col(i) = score_func.gradient(final_mat.col(i), target.col(i));
+//  }
+  assert(final_mat.size() == target.size());
+  MatrixXd res = score_func.gradient(final_mat, target);
   return res;
 }
 

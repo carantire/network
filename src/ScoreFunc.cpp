@@ -4,17 +4,16 @@
 
 #include "ScoreFunc.h"
 
-using Eigen::VectorXd;
+using Eigen::MatrixXd;
 
 namespace network {
 struct ScoreDatabase {
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
-
   template <ScoreId> static double score(const VectorXd &, const VectorXd &);
 
   template <ScoreId>
-  static VectorXd gradient(const VectorXd &, const VectorXd &);
+  static MatrixXd gradient(const MatrixXd &, const MatrixXd &);
 
   template <>
   inline double score<ScoreId::MSE>(const VectorXd &input,
@@ -23,8 +22,8 @@ struct ScoreDatabase {
   }
 
   template <>
-  inline VectorXd gradient<ScoreId::MSE>(const VectorXd &input,
-                                         const VectorXd &target) {
+  inline MatrixXd gradient<ScoreId::MSE>(const MatrixXd &input,
+                                         const MatrixXd &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return 2.0 * (input - target);
@@ -40,8 +39,8 @@ struct ScoreDatabase {
   }
 
   template <>
-  inline VectorXd gradient<ScoreId::MAE>(const VectorXd &input,
-                                         const VectorXd &target) {
+  inline MatrixXd gradient<ScoreId::MAE>(const MatrixXd &input,
+                                         const MatrixXd &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return (input - target).unaryExpr([](double el) {
@@ -57,8 +56,8 @@ struct ScoreDatabase {
            input.unaryExpr([](double el) { return log(el); });
   }
   template <>
-  inline VectorXd gradient<ScoreId::CrossEntropy>(const VectorXd &input,
-                                                  const VectorXd &target) {
+  inline MatrixXd gradient<ScoreId::CrossEntropy>(const MatrixXd &input,
+                                                  const MatrixXd &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return -target.cwiseProduct(
@@ -97,8 +96,8 @@ double ScoreFunc::score(const VectorXd &input, const VectorXd &target) const {
   return score_func_(input, target);
 }
 
-VectorXd ScoreFunc::gradient(const VectorXd &input,
-                             const VectorXd &target) const {
+Eigen::MatrixXd ScoreFunc::gradient(const MatrixXd &input,
+                                    const MatrixXd &target) const {
   return gradient_func_(input, target);
 }
 
