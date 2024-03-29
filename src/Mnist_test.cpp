@@ -71,7 +71,7 @@ void Mnist_test::test() {
       }
       auto in = MatConstructor(dataset.test_images, i, 1);
       auto res = net.Calculate(in);
-      int max_ind;
+      int max_ind = 0;
       double max_val = res.maxCoeff(&max_ind);
       correct += max_ind == dataset.test_labels[i];
     }

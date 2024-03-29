@@ -34,14 +34,14 @@ public:
 
   Index Get_Input_Dim() const;
 
-  void Print_Mat() const;
+  MatrixXd Get_Mat() const;
 
-  MatrixXd A_;
 private:
   static MatrixXd getNormal(Index rows, Index columns);
 
   ThresholdFunc ThresholdFunc_;
 
+  MatrixXd A_;
   VectorXd b_;
 };
 } // namespace network

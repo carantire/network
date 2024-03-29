@@ -23,11 +23,8 @@ struct ThresholdDatabase {
   template <ThresholdId> static MatrixXd evaluate_1_mat(const MatrixXd &);
 
   template <> inline double evaluate_0<ThresholdId::Sigmoid>(double x) {
-    //    std::cout << x << std::endl;
-    //    assert(std::isfinite(x));
 
-    double result = 1 / (1 + std::exp(x));
-    //    std::cout << "eval: " << x << " " << result << std::endl;
+    double result = 1 / (1 + std::exp(-x));
 
     assert(std::isfinite(result));
     return result;

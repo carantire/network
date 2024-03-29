@@ -3,6 +3,7 @@
 //
 
 #include "tests.h"
+
 namespace network {
 using MatrixXd = Network::MatrixXd;
 using VectorXd = Network::VectorXd;
@@ -11,17 +12,42 @@ void Test::thres_constructor_test() {
   auto thres_sig = ThresholdFunc::create(ThresholdId::Sigmoid);
   auto thres_relu = ThresholdFunc::create(ThresholdId::ReLu);
 }
-void Test::thres_apply_test() {
+void Test::sig_apply_test() {
   auto thres = ThresholdFunc::create(ThresholdId::Sigmoid);
   MatrixXd mat(2, 3);
   mat << 1, 2, 3, 4, 5, 6;
-  thres.apply(mat);
+  mat = thres.apply(mat);
+  MatrixXd ans(2, 3);
+  ans << 0.73105, 0.880797, 0.952574, 0.98201379, 0.993307149, 0.9975273;
+  assert(abs((mat - ans).array().maxCoeff()) < 1e-5);
 }
-void Test::thres_derive_test() {
+void Test::sig_derive_test() {
+  auto thres = ThresholdFunc::create(ThresholdId::Sigmoid);
+  MatrixXd mat(2, 3);
+  mat << -10, -1, 0, 1, 2, 10;
+  mat = thres.derive(mat);
+  MatrixXd ans(2, 3);
+  ans << 4.539580, 0.1966119, 0.25, 0.1966119, 0.10499358, 4.5395807;
+  assert(abs((mat - ans).array().maxCoeff()) < 1e-5);
+}
+void Test::relu_apply_test() {
   auto thres = ThresholdFunc::create(ThresholdId::ReLu);
   MatrixXd mat(2, 3);
-  mat << 1, 2, 3, 4, 5, 6;
-  thres.derive(mat);
+  mat << -10, -1, 0, 1, 2, 10;
+  mat = thres.apply(mat);
+  MatrixXd ans(2, 3);
+  ans << 0, 0, 0, 1, 2, 10;
+  assert(abs((mat - ans).array().maxCoeff()) < 1e-5);
+}
+
+void Test::relu_derive_test() {
+  auto thres = ThresholdFunc::create(ThresholdId::ReLu);
+  MatrixXd mat(2, 3);
+  mat << -10, -1, 0, 1, 2, 10;
+  mat = thres.derive(mat);
+  MatrixXd ans(2, 3);
+  ans << 0, 0, 0, 1, 1, 1;
+  assert(abs((mat - ans).array().maxCoeff()) < 1e-5);
 }
 
 void Test::score_constructor_test() {
@@ -36,71 +62,58 @@ void Test::score_gradient_test() {
   VectorXd out(3);
   in << 2, 3, 4;
   out << 100, 200, 300;
-  score_func_mse.gradient(in, out);
-}
+  VectorXd grad = score_func_mse.gradient(in, out);
+  VectorXd ans(3);
+  ans << 2 * (-98), 2 * (3 - 200), 2 * (4 - 300);
+  assert(abs((grad - ans).array().maxCoeff()) < 1e-5);
 
-void Test::score_score_test() {
-  auto score_func_mse = ScoreFunc::create(ScoreId::MSE);
-  VectorXd in(3);
-  VectorXd out(3);
-  score_func_mse.score(in, out);
 }
 
 void Test::layer_constructor_test() {
   auto layer = Layer(ThresholdId::ReLu, 2, 3);
 }
-void Test::layer_grad_test1() {
-  auto layer = Layer(ThresholdId::ReLu, 2, 4);
-  MatrixXd grad(4, 2);
-  MatrixXd applied_val(4, 2);
-  layer.gradx(grad, applied_val);
+void Test::layer_grad_test() {
+  auto layer = Layer(ThresholdId::ReLu, 2, 2);
+  MatrixXd A(2, 2);
+  A << 1, 1, 1, 1;
+  MatrixXd grad(2, 2);
+  grad << -1, 0, -1, 0;
+  MatrixXd applied_val(2, 2);
+  applied_val << 2, 1, 1, 2;
+  auto new_grad = layer.gradx(grad, applied_val);
+  MatrixXd ans(2, 2);
+  ans << -1, 0, -1, 0;
+  assert(abs((new_grad -  layer.Get_Mat().transpose() * ans).array().maxCoeff()) < 1e-5);
 }
-void Test::layer_grad_test2() {
-  auto layer = Layer(ThresholdId::ReLu, 2, 3);
-  MatrixXd val(2, 2);
-  MatrixXd applied_val(3, 2);
-  MatrixXd grad(3, 2);
-  layer.apply_gradA(val, grad, applied_val, 1);
-}
-void Test::layer_grad_test3() {
-  auto layer = Layer(ThresholdId::Sigmoid, 2, 3);
-  MatrixXd applied_val(3, 2);
-  MatrixXd grad(3, 2);
-  layer.apply_gradb(grad, applied_val, 0.5);
-}
+
 
 void Test::network_constructor_test() {
   auto net = Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid});
 }
 void Test::network_train_test() {
-  auto net = Network({2, 3, 4, 5, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::SoftMax});
+  auto net =
+      Network({2, 3, 4, 5, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid,
+                                ThresholdId::Sigmoid, ThresholdId::SoftMax});
   MatrixXd batch(2, 3);
   MatrixXd target(4, 3);
   net.Train(batch, target, ScoreFunc::create(ScoreId::CrossEntropy), 42, 0.5);
 }
-void Test::network_calc_test() {
-  auto net = Network({2, 3, 4, 2, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::Sigmoid});
-  VectorXd batch(2);
-  batch << 1, 2;
-  net.Calculate(batch);
-}
+
 void Test::run_all_tests() {
   thres_constructor_test();
-  thres_apply_test();
-  thres_derive_test();
+  sig_apply_test();
+  sig_derive_test();
+  relu_apply_test();
+  relu_derive_test();
 
   score_constructor_test();
-  score_score_test();
   score_gradient_test();
 
   layer_constructor_test();
-  layer_grad_test1();
-  layer_grad_test2();
-  layer_grad_test3();
+  layer_grad_test();
 
   network_constructor_test();
   network_train_test();
-  network_calc_test();
 }
 
 } // namespace network

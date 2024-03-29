@@ -25,8 +25,6 @@ MatrixXd Layer::apply_threshold(const MatrixXd &value) const {
 }
 
 MatrixXd Layer::derive(const MatrixXd &applied_values) const {
-  //  std::cout << ThresholdFunc_.derive(vec).rows() << " " <<
-  //  ThresholdFunc_.derive(vec).cols() << '\n';
   return ThresholdFunc_.derive(applied_values);
 }
 
@@ -54,7 +52,7 @@ void Layer::apply_gradA(const MatrixXd &values, const MatrixXd &grad,
   assert(diff.cols() == A_.cols());
   assert(diff.rows() == A_.rows());
 
-  A_ += step * diff;
+  A_ -= step * diff;
 }
 
 void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
@@ -62,11 +60,11 @@ void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
   auto diff = (derive_mat(applied_val, grad) *
                VectorXd::Ones(applied_val.cols()) / applied_val.cols())
                   .eval();
-  b_ += step * diff;
+  b_ -= step * diff;
 }
 
 RandGen &getUrng() {
-  static RandGen urng = 1;
+  static RandGen urng = 2;
   return urng;
 }
 
@@ -79,8 +77,8 @@ MatrixXd Layer::getNormal(Index rows, Index columns) {
 
 Index Layer::Get_Input_Dim() const { return A_.cols(); };
 
-void Layer::Print_Mat() const {
-  std::cout << A_.leftCols(5).transpose().leftCols(5).transpose() << "\n\n\n";
+MatrixXd Layer::Get_Mat() const {
+  return A_;
 }
 
 } // namespace network

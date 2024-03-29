@@ -15,11 +15,11 @@ using namespace std;
 int main() {
     using namespace network;
     try {
-//      Test::run_all_tests();
+      Test::run_all_tests();
     } catch (...) {
       except::react();
     }
-    Mnist_test::test();
+//    Mnist_test::test();
 //    sin_test::test();
   return 0;
 }
