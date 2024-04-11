@@ -45,7 +45,8 @@ VectorXd Network::Calculate(const VectorXd &start_vec) const {
 }
 
 void Network::Train(const MatrixXd &input, const MatrixXd &target,
-                    const ScoreFunc &score_func, int epoch_num,
+                    const ScoreFunc &score_func, LearningSpeedId Id,
+                    vector<double> coef_data, int epoch_num,
                     int batch_size) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
@@ -57,8 +58,10 @@ void Network::Train(const MatrixXd &input, const MatrixXd &target,
       int start_ind = batch_num * batch_size;
       auto input_batch = input.block(0, start_ind, input.rows(), batch_size);
       auto output_batch = target.block(0, start_ind, target.rows(), batch_size);
+      coef_data.push_back(1+epoch);
       Back_Prop(Forward_Prop(input_batch), output_batch, score_func,
-                0.15 / (1 + epoch));
+                CalculateCoef(Id, coef_data));
+      coef_data.pop_back();
     }
   }
 }

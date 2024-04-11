@@ -45,7 +45,7 @@ void Mnist_test::test() {
               1. / 12);
   MatrixXd input = Mnist_input(dataset.training_images);
   MatrixXd target = Mnist_output(dataset.training_labels);
-  net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 20, 30);
+  net.Train(input, target, ScoreFunc::create(ScoreId::MSE), network::LearningSpeedId::Linear, {0.15}, 20, 30);
 
   int correct = 0;
   std::cout << '\n';

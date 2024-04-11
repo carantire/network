@@ -21,7 +21,7 @@ void Xor_test::test() {
                ThresholdId::Sigmoid},
               1, 1);
   auto score_func = ScoreFunc::create(network::ScoreId::MSE);
-  net.Train(xor_train_input_, xor_train_output_, score_func, 100, 1);
+  net.Train(xor_train_input_, xor_train_output_, score_func, network::LearningSpeedId::Linear, {0.15}, 100, 1);
   int hit_cnt = 0;
   int test_cnt = 1000;
   for (int i = 0; i < test_cnt; ++i) {
