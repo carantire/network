@@ -6,36 +6,30 @@
 void sin_test::test() {
   std::random_device rd;
   std::mt19937 gen(42);
-  std::uniform_real_distribution<> dis(0, M_PI + 0.01);
-  int size = 500;
-  vector<double> in_values(size);
-  vector<double> target_values(size);
+  std::uniform_real_distribution<> train_dis(-M_PI/2, M_PI + M_PI/2);
+  int size = 1000;
+  MatrixXd in_values(1, size);
+  MatrixXd target_values(1, size);
   for (int i = 0; i < size; ++i) {
-    double randomNum = dis(gen);
-    in_values[i] = randomNum;
-    target_values[i] = sin(randomNum);
+    double randomNum = train_dis(gen);
+    in_values(0, i) = randomNum;
+    target_values(0, i) = sin(randomNum);
   }
 
-  Network net({1, 50, 50, 1}, {ThresholdId::Sigmoid, ThresholdId::Sigmoid,
-                               ThresholdId::Sigmoid});
-  for (int epoch = 0; epoch < 10; ++epoch) {
-    for (int k = 0; k < size; ++k) {
-      MatrixXd input(1, 1);
-      MatrixXd target(1, 1);
-      input << in_values[k];
-      target << target_values[k];
-      net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 1, 1.24);
-    }
-  }
+  Network net(
+      {1, 50, 50, 1},
+      {ThresholdId::Default, ThresholdId::Sigmoid, ThresholdId::Default}, 1, 1);
+  net.Train(in_values, target_values, ScoreFunc::create(ScoreId::MSE), 100, 1);
   double score = 0;
+  std::uniform_real_distribution<> test_dis(0, M_PI);
   for (int i = 0; i < size; ++i) {
-    double randomNum = dis(gen);
+    double randomNum = test_dis(gen);
     VectorXd test_input(1, 1);
     test_input << randomNum;
-    score += abs(net.Calculate(test_input)(0, 0) - sin(randomNum));
-    test_input << in_values[i];
-    std::cout << net.Calculate(test_input) << " " << sin(randomNum) << '\n';
+    double predict = net.Calculate(test_input)(0, 0);
+    double correct = sin(randomNum);
+    score += abs(predict - correct);
+//    std::cout << "Predict: " << predict << " Correct: " << correct << '\n';
   }
-
-  std::cout << score / size;
+  std::cout << "Total score: " << score / size;
 }

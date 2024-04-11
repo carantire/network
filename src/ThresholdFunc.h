@@ -112,7 +112,9 @@ class ThresholdFunc {
 public:
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
+
   using FunctionType = std::function<MatrixXd(const MatrixXd &)>;
+
   ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1);
 
   template <ThresholdId Id> static ThresholdFunc create() {

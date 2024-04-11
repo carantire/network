@@ -13,7 +13,7 @@ public:
   using VectorXd = Eigen::VectorXd;
   using Index = Eigen::Index;
 
-  Layer(ThresholdId id, Index in_size, Index out_size);
+  Layer(ThresholdId id, Index in_size, Index out_size, int seed, double normalize);
 
   MatrixXd apply_linear(const MatrixXd &values) const;
 
@@ -37,7 +37,7 @@ public:
   MatrixXd Get_Mat() const;
 
 private:
-  static MatrixXd getNormal(Index rows, Index columns);
+  static MatrixXd getNormal(Index rows, Index columns, int seed, double normalize);
 
   ThresholdFunc ThresholdFunc_;
 

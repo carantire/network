@@ -66,14 +66,13 @@ void Test::score_gradient_test() {
   VectorXd ans(3);
   ans << 2 * (-98), 2 * (3 - 200), 2 * (4 - 300);
   assert(abs((grad - ans).array().maxCoeff()) < 1e-5);
-
 }
 
 void Test::layer_constructor_test() {
-  auto layer = Layer(ThresholdId::ReLu, 2, 3);
+  auto layer = Layer(ThresholdId::ReLu, 2, 3, 1, 1);
 }
 void Test::layer_grad_test() {
-  auto layer = Layer(ThresholdId::ReLu, 2, 2);
+  auto layer = Layer(ThresholdId::ReLu, 2, 2, 1, 1);
   MatrixXd A(2, 2);
   A << 1, 1, 1, 1;
   MatrixXd grad(2, 2);
@@ -83,20 +82,23 @@ void Test::layer_grad_test() {
   auto new_grad = layer.gradx(grad, applied_val);
   MatrixXd ans(2, 2);
   ans << -1, 0, -1, 0;
-  assert(abs((new_grad -  layer.Get_Mat().transpose() * ans).array().maxCoeff()) < 1e-5);
+  assert(
+      abs((new_grad - layer.Get_Mat().transpose() * ans).array().maxCoeff()) <
+      1e-5);
 }
-
 
 void Test::network_constructor_test() {
-  auto net = Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid});
+  auto net =
+      Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1, 1);
 }
 void Test::network_train_test() {
-  auto net =
-      Network({2, 3, 4, 5, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid,
-                                ThresholdId::Sigmoid, ThresholdId::SoftMax});
+  auto net = Network({2, 3, 4, 5, 4},
+                     {ThresholdId::ReLu, ThresholdId::Sigmoid,
+                      ThresholdId::Sigmoid, ThresholdId::SoftMax},
+                     1, 1);
   MatrixXd batch(2, 3);
   MatrixXd target(4, 3);
-  net.Train(batch, target, ScoreFunc::create(ScoreId::CrossEntropy), 42, 0.5);
+  net.Train(batch, target, ScoreFunc::create(ScoreId::CrossEntropy), 1, 1);
 }
 
 void Test::run_all_tests() {

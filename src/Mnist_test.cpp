@@ -4,23 +4,21 @@
 using MatrixXd = Eigen::MatrixXd;
 using VectorXd = Eigen::VectorXd;
 
-MatrixXd Mnist_test::MatConstructor(const vector<vector<unsigned char>> &mat,
-                                    int start_ind, int batch_size) {
-  MatrixXd res(mat[0].size(), batch_size);
-  for (int i = start_ind; i < start_ind + batch_size; ++i) {
+MatrixXd Mnist_test::Mnist_input(const vector<vector<unsigned char>> &mat) {
+  MatrixXd res(mat[0].size(), mat.size());
+  for (int i = 0; i < mat.size(); ++i) {
     for (int j = 0; j < mat[0].size(); ++j) {
-      res(j, i - start_ind) = double(mat[i][j]) / 255.;
+      res(j, i) = double(mat[i][j]) / 255.;
     }
   }
   return res;
 }
 
-MatrixXd Mnist_test::OutConstructor(const vector<unsigned char> &mat,
-                                    int start_ind, int batch_size) {
-  MatrixXd res(10, batch_size);
-  for (int i = start_ind; i < start_ind + batch_size; ++i) {
+MatrixXd Mnist_test::Mnist_output(const vector<unsigned char> &mat) {
+  MatrixXd res(10, mat.size());
+  for (int i = 0; i < mat.size(); ++i) {
     for (int j = 0; j < 10; ++j) {
-      res(j, i - start_ind) = j == mat[i] ? 1 : 0;
+      res(j, i) = j == mat[i] ? 1 : 0;
     }
   }
   return res;
@@ -43,52 +41,20 @@ void Mnist_test::test() {
   std::cout << "Nbr of test labels = " << dataset.test_labels.size()
             << std::endl;
 
-  Network net({784, 256, 10},
-              {ThresholdId::ReLu, ThresholdId::Sigmoid});
+  Network net({784, 256, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
+              1. / 12);
+  MatrixXd input = Mnist_input(dataset.training_images);
+  MatrixXd target = Mnist_output(dataset.training_labels);
+  net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 20, 30);
 
-  for (int epoch = 0; epoch < 10; ++epoch) {
-    std::cout << "Epoch num: " << epoch << '\n';
-    std::cout << '\n';
-    for (int k = 0; k < 2000; ++k) {
-//      if (k % 100 == 0) {
-//        std::cout << k << " vectors trained" << '\n';
-//      }
-      int batch_size = 30;
-      int start_ind = k * batch_size;
-      MatrixXd input =
-          MatConstructor(dataset.training_images, start_ind, batch_size);
-      MatrixXd target =
-          OutConstructor(dataset.training_labels, start_ind, batch_size);
-      net.Train(input, target, ScoreFunc::create(ScoreId::MSE), 1,
-                0.15/(1 + epoch));
-    }
-
-    int correct = 0;
-    std::cout << '\n';
-    for (int i = 0; i < 10000; ++i) {
-      if (i % 1000 == 0) {
-        std::cout << i << " correct out of " << correct << '\n';
-      }
-      auto in = MatConstructor(dataset.test_images, i, 1);
-      auto res = net.Calculate(in);
-      int max_ind = 0;
-      double max_val = res.maxCoeff(&max_ind);
-      correct += max_ind == dataset.test_labels[i];
-    }
-    std::cout << "Correct results out of 10000: " << correct << '\n';
-
-//    int correct = 0;
-//    std::cout << '\n';
-//    for (int i = 0; i < 60000; ++i) {
-//      if (i % 10000 == 0) {
-//        std::cout << i << " correct out of " << correct << '\n';
-//      }
-//      auto in = MatConstructor(dataset.training_images, i, 1);
-//      auto res = net.Calculate(in);
-//      int max_ind;
-//      double max_val = res.maxCoeff(&max_ind);
-//      correct += max_ind == dataset.training_labels[i];
-//    }
-//    std::cout << "Correct results out of 60000: " << correct << '\n';
+  int correct = 0;
+  std::cout << '\n';
+  auto test_input = Mnist_input(dataset.test_images);
+  for (int i = 0; i < 10000; ++i) {
+    auto res = net.Calculate(test_input.col(i));
+    int max_ind = 0;
+    double max_val = res.maxCoeff(&max_ind);
+    correct += max_ind == dataset.test_labels[i];
   }
+  std::cout << "Correct results out of 10000: " << correct << '\n';
 }

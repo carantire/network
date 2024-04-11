@@ -11,9 +11,10 @@ using VectorXd = Layer::VectorXd;
 using MatrixXd = Layer::MatrixXd;
 using RandGen = Eigen::Rand::Vmt19937_64;
 
-Layer::Layer(ThresholdId id, Index in_size, Index out_size)
+Layer::Layer(ThresholdId id, Index in_size, Index out_size, int seed, double normalize)
     : ThresholdFunc_(ThresholdFunc::create(id)),
-      A_(getNormal(out_size, in_size)), b_(getNormal(out_size, 1)) {}
+      A_(getNormal(out_size, in_size, seed, normalize)), b_(getNormal(out_size, 1, seed, normalize)) {
+}
 
 MatrixXd Layer::apply_linear(const MatrixXd &x) const {
 
@@ -63,22 +64,20 @@ void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
   b_ -= step * diff;
 }
 
-RandGen &getUrng() {
-  static RandGen urng = 2;
+RandGen &getUrng(int seed) {
+  static RandGen urng = seed;
   return urng;
 }
 
-MatrixXd Layer::getNormal(Index rows, Index columns) {
+MatrixXd Layer::getNormal(Index rows, Index columns, int seed, double normalize) {
   assert(rows > 0 && "rows must be positive");
   assert(columns > 0 && "columns must be positive");
   MatrixXd A(rows, columns);
-  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng()) / 12.;
+  return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng(seed)) * normalize;
 }
 
 Index Layer::Get_Input_Dim() const { return A_.cols(); };
 
-MatrixXd Layer::Get_Mat() const {
-  return A_;
-}
+MatrixXd Layer::Get_Mat() const { return A_; }
 
 } // namespace network
