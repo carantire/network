@@ -6,35 +6,32 @@
 #include <iostream>
 
 namespace network {
-using Index = Layer::Index;
-using VectorXd = Layer::VectorXd;
-using MatrixXd = Layer::MatrixXd;
-using RandGen = Eigen::Rand::Vmt19937_64;
+
 
 Layer::Layer(ThresholdId id, Index in_size, Index out_size, int seed, double normalize)
     : ThresholdFunc_(ThresholdFunc::create(id)),
       A_(getNormal(out_size, in_size, seed, normalize)), b_(getNormal(out_size, 1, seed, normalize)) {
 }
 
-MatrixXd Layer::apply_linear(const MatrixXd &x) const {
+Layer::MatrixXd Layer::apply_linear(const MatrixXd &x) const {
 
   return (A_ * x + b_ * VectorXd::Ones(x.cols()).transpose()).eval();
 }
 
-MatrixXd Layer::apply_threshold(const MatrixXd &value) const {
+Layer::MatrixXd Layer::apply_threshold(const MatrixXd &value) const {
   return ThresholdFunc_.apply(value);
 }
 
-MatrixXd Layer::derive(const MatrixXd &applied_values) const {
+Layer::MatrixXd Layer::derive(const MatrixXd &applied_values) const {
   return ThresholdFunc_.derive(applied_values);
 }
 
-MatrixXd Layer::derive_mat(const MatrixXd &applied_values_mat,
+Layer::MatrixXd Layer::derive_mat(const MatrixXd &applied_values_mat,
                            const MatrixXd &grad) const {
   return (derive(applied_values_mat).cwiseProduct(grad)).eval();
 }
 
-MatrixXd Layer::gradx(const MatrixXd &grad, const MatrixXd &applied_val) const {
+Layer::MatrixXd Layer::gradx(const MatrixXd &grad, const MatrixXd &applied_val) const {
   return (A_.transpose() * derive_mat(applied_val, grad)).eval();
 }
 
@@ -64,20 +61,19 @@ void Layer::apply_gradb(const MatrixXd &grad, const MatrixXd &applied_val,
   b_ -= step * diff;
 }
 
-RandGen &getUrng(int seed) {
-  static RandGen urng = seed;
+Layer::RandGen &getUrng(int seed) {
+  static Layer::RandGen urng = seed;
   return urng;
 }
 
-MatrixXd Layer::getNormal(Index rows, Index columns, int seed, double normalize) {
+Layer::MatrixXd Layer::getNormal(Index rows, Index columns, int seed, double normalize) {
   assert(rows > 0 && "rows must be positive");
   assert(columns > 0 && "columns must be positive");
-  MatrixXd A(rows, columns);
   return Eigen::Rand::normal<MatrixXd>(rows, columns, getUrng(seed)) * normalize;
 }
 
-Index Layer::Get_Input_Dim() const { return A_.cols(); };
+Layer::Index Layer::Get_Input_Dim() const { return A_.cols(); };
 
-MatrixXd Layer::Get_Mat() const { return A_; }
+Layer::MatrixXd Layer::Get_Mat() const { return A_; }
 
 } // namespace network

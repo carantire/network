@@ -5,8 +5,7 @@
 #include "tests.h"
 
 namespace network {
-using MatrixXd = Network::MatrixXd;
-using VectorXd = Network::VectorXd;
+
 
 void Test::thres_constructor_test() {
   auto thres_sig = ThresholdFunc::create(ThresholdId::Sigmoid);

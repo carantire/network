@@ -13,8 +13,8 @@
 #include <mnist/mnist_reader.hpp>
 
 using namespace network;
-using std::vector;
 class Mnist_test {
+  template <class T> using vector = std::vector<T>;
   using MatrixXd = Network::MatrixXd;
   static MatrixXd Mnist_input(const vector<vector<unsigned char>> &mat);
 

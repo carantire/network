@@ -5,9 +5,6 @@
 #include "ThresholdFunc.h"
 
 namespace network {
-using VectorXd = Network::VectorXd;
-using MatrixXd = Network::MatrixXd;
-using vector = Network::vector<LayerValue>;
 
 Network::Network(std::initializer_list<int> dimensions,
                  std::initializer_list<ThresholdId> threshold_id, int seed,
@@ -22,7 +19,7 @@ Network::Network(std::initializer_list<int> dimensions,
   }
 }
 
-std::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
+Network::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
   vector<LayerValue> layer_values(layers_.size());
   MatrixXd cur_mat = start_mat;
   for (size_t i = 0; i < layers_.size(); ++i) {
@@ -34,7 +31,7 @@ std::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
   return layer_values;
 }
 
-VectorXd Network::Calculate(const VectorXd &start_vec) const {
+Network::VectorXd Network::Calculate(const VectorXd &start_vec) const {
   assert(start_vec.rows() == layers_.front().Get_Input_Dim());
   auto cur_mat = start_vec;
   for (size_t i = 0; i < layers_.size(); ++i) {
@@ -80,7 +77,7 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
              .unaryExpr([](double el) { return abs(el); });
 }
 
-MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
+Network::MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
                                 const ScoreFunc &score_func) const {
 
   auto final_mat = layers_.back().apply_threshold(input);

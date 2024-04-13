@@ -4,6 +4,8 @@
 namespace network {
 class Test {
 public:
+  using MatrixXd = Network::MatrixXd;
+  using VectorXd = Network::VectorXd;
   static void thres_constructor_test();
   static void sig_apply_test();
   static void sig_derive_test();

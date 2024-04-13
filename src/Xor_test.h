@@ -11,11 +11,13 @@
 #include <vector>
 
 using namespace network;
-using std::vector;
-using MatrixXd = Eigen::MatrixXd;
+
 class Xor_test {
+  using MatrixXd = Eigen::MatrixXd;
+  template <class T> using vector = std::vector<T>;
   MatrixXd xor_train_input_;
   MatrixXd xor_train_output_;
+
 public:
   void test();
 };

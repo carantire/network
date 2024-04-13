@@ -17,8 +17,6 @@ struct LayerValue {
 };
 
 class Network {
-  template <class T> using vector = std::vector<T>;
-
 public:
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
@@ -37,7 +35,6 @@ public:
 
   double CalculateCoef(LearningSpeedId Id, const vector<double> &coef_data) {
     switch (Id) {
-
     case (LearningSpeedId::Const): {
       assert(coef_data.size() == 1);
       return coef_data.front();
@@ -55,9 +52,9 @@ public:
     }
     }
   }
-  vector<Layer> layers_;
 
 private:
+  vector<Layer> layers_;
   vector<LayerValue> Forward_Prop(const MatrixXd &start_vec) const;
   double Back_Prop(const vector<LayerValue> &layer_values,
                    const MatrixXd &target, const ScoreFunc &score_func,

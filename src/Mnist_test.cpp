@@ -1,10 +1,8 @@
 #include "Mnist_test.h"
 #include <algorithm>
 
-using MatrixXd = Eigen::MatrixXd;
-using VectorXd = Eigen::VectorXd;
 
-MatrixXd Mnist_test::Mnist_input(const vector<vector<unsigned char>> &mat) {
+Mnist_test::MatrixXd Mnist_test::Mnist_input(const vector<vector<unsigned char>> &mat) {
   MatrixXd res(mat[0].size(), mat.size());
   for (int i = 0; i < mat.size(); ++i) {
     for (int j = 0; j < mat[0].size(); ++j) {
@@ -14,7 +12,7 @@ MatrixXd Mnist_test::Mnist_input(const vector<vector<unsigned char>> &mat) {
   return res;
 }
 
-MatrixXd Mnist_test::Mnist_output(const vector<unsigned char> &mat) {
+Mnist_test::MatrixXd Mnist_test::Mnist_output(const vector<unsigned char> &mat) {
   MatrixXd res(10, mat.size());
   for (int i = 0; i < mat.size(); ++i) {
     for (int j = 0; j < 10; ++j) {
@@ -25,27 +23,16 @@ MatrixXd Mnist_test::Mnist_output(const vector<unsigned char> &mat) {
 }
 
 void Mnist_test::test() {
-  // MNIST_DATA_LOCATION set by MNIST cmake config
-  std::cout << "MNIST data directory: " << MNIST_DATA_LOCATION << std::endl;
-
-  // Load MNIST data
   mnist::MNIST_dataset<std::vector, std::vector<uint8_t>, uint8_t> dataset =
       mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(
           MNIST_DATA_LOCATION);
-  std::cout << "Nbr of training images = " << dataset.training_images.size()
-            << std::endl;
-  std::cout << "Nbr of training labels = " << dataset.training_labels.size()
-            << std::endl;
-  std::cout << "Nbr of test images = " << dataset.test_images.size()
-            << std::endl;
-  std::cout << "Nbr of test labels = " << dataset.test_labels.size()
-            << std::endl;
 
   Network net({784, 256, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
               1. / 12);
   MatrixXd input = Mnist_input(dataset.training_images);
   MatrixXd target = Mnist_output(dataset.training_labels);
-  net.Train(input, target, ScoreFunc::create(ScoreId::MSE), network::LearningSpeedId::Linear, {0.15}, 20, 30);
+  net.Train(input, target, ScoreFunc::create(ScoreId::MSE),
+            network::LearningSpeedId::Linear, {0.15}, 10, 30);
 
   int correct = 0;
   std::cout << '\n';

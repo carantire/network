@@ -6,12 +6,12 @@
 #include <cmath>
 #include <random>
 #include <vector>
-using MatrixXd = Eigen::MatrixXd;
-using VectorXd = Eigen::MatrixXd;
-using std::vector;
 using namespace network;
 
 class sin_test {
+  using MatrixXd = Eigen::MatrixXd;
+  using VectorXd = Eigen::MatrixXd;
+  template <class T> using vector = std::vector<T>;
 public:
   static void test();
 };

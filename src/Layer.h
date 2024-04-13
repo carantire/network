@@ -12,6 +12,7 @@ public:
   using MatrixXd = Eigen::MatrixXd;
   using VectorXd = Eigen::VectorXd;
   using Index = Eigen::Index;
+  using RandGen = Eigen::Rand::Vmt19937_64;
 
   Layer(ThresholdId id, Index in_size, Index out_size, int seed, double normalize);
 

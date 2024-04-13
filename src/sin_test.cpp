@@ -20,7 +20,7 @@ void sin_test::test() {
       {1, 50, 50, 1},
       {ThresholdId::Default, ThresholdId::Sigmoid, ThresholdId::Default}, 1, 1);
   net.Train(in_values, target_values, ScoreFunc::create(ScoreId::MSE),
-            network::LearningSpeedId::Linear, {0.15}, 100, 1);
+            network::LearningSpeedId::Linear, {0.15}, 500, 1);
   double score = 0;
   std::uniform_real_distribution<> test_dis(0, M_PI);
   for (int i = 0; i < size; ++i) {
@@ -33,5 +33,14 @@ void sin_test::test() {
     //    std::cout << "Predict: " << predict << " Correct: " << correct <<
     //    '\n';
   }
+  int n = 10000;
+  vector<double> val(n + 1);
+  for (int i = 0; i <= n; ++i){
+    VectorXd test_input(1, 1);
+    test_input << i * M_PI / n;
+    val[i] = net.Calculate(test_input)(0, 0);
+  }
+  std::ofstream out_file("out.data");
+  out_file.write((char *)val.data(), val.size() * sizeof(val[0]));
   std::cout << "Total score: " << score / size;
 }
