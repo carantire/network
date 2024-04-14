@@ -19,7 +19,8 @@ Network::Network(std::initializer_list<int> dimensions,
   }
 }
 
-Network::vector<LayerValue> Network::Forward_Prop(const MatrixXd &start_mat) const {
+Network::vector<LayerValue>
+Network::Forward_Prop(const MatrixXd &start_mat) const {
   vector<LayerValue> layer_values(layers_.size());
   MatrixXd cur_mat = start_mat;
   for (size_t i = 0; i < layers_.size(); ++i) {
@@ -43,19 +44,20 @@ Network::VectorXd Network::Calculate(const VectorXd &start_vec) const {
 
 void Network::Train(const MatrixXd &input, const MatrixXd &target,
                     const ScoreFunc &score_func, LearningSpeedId Id,
-                    vector<double> coef_data, int epoch_num,
-                    int batch_size) {
+                    vector<double> coef_data, int epoch_num, int batch_size) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(input.cols() % batch_size == 0 && "Number of batches must be integer");
-  for (int epoch = 0; epoch < epoch_num; ++epoch) {
+  for (Index epoch = 0; epoch < epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
-    for (int batch_num = 0; batch_num < input.cols() / batch_size;
+    for (Index batch_num = 0; batch_num < input.cols() / batch_size;
          ++batch_num) {
-      int start_ind = batch_num * batch_size;
-      auto input_batch = input.block(0, start_ind, input.rows(), batch_size);
-      auto output_batch = target.block(0, start_ind, target.rows(), batch_size);
-      coef_data.push_back(1+epoch);
+      Index start_ind = batch_num * batch_size;
+      const MatrixXd &input_batch =
+          input.block(0, start_ind, input.rows(), batch_size);
+      const MatrixXd &output_batch =
+          target.block(0, start_ind, target.rows(), batch_size);
+      coef_data.push_back(1 + epoch);
       Back_Prop(Forward_Prop(input_batch), output_batch, score_func,
                 CalculateCoef(Id, coef_data));
       coef_data.pop_back();
@@ -77,8 +79,9 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
              .unaryExpr([](double el) { return abs(el); });
 }
 
-Network::MatrixXd Network::GetGradMatrix(const MatrixXd &input, const MatrixXd &target,
-                                const ScoreFunc &score_func) const {
+Network::MatrixXd Network::GetGradMatrix(const MatrixXd &input,
+                                         const MatrixXd &target,
+                                         const ScoreFunc &score_func) const {
 
   auto final_mat = layers_.back().apply_threshold(input);
   assert(final_mat.size() == target.size());
