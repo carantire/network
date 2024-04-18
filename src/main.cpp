@@ -20,8 +20,8 @@ int main() {
     } catch (...) {
       except::react();
     }
-    Mnist_test::test();
-//    sin_test::test();
+//    Mnist_test::test();
+    sin_test::test();
 //    Xor_test xor_test;
 //    xor_test.test();
   return 0;

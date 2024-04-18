@@ -36,19 +36,18 @@ public:
   double CalculateCoef(LearningSpeedId Id, const vector<double> &coef_data) {
     switch (Id) {
     case (LearningSpeedId::Const): {
-      assert(coef_data.size() == 1);
+      assert(coef_data.size() == 2);
       return coef_data.front();
     }
 
     case (LearningSpeedId::Linear): {
-      assert(coef_data.size() == 2);
-      return coef_data.front() / coef_data.back();
+      assert(coef_data.size() == 3);
+      return coef_data[0] / (coef_data[1] * coef_data[2]);
     }
 
     case (LearningSpeedId::Exponent): {
-      assert(coef_data.size() == 4);
-      return coef_data[0] *
-             pow(coef_data[1] / (coef_data[1] * coef_data[2]), coef_data[3]);
+      assert(coef_data.size() == 3);
+      return coef_data[0] * exp(-coef_data[1] * coef_data[2]);
     }
     }
   }

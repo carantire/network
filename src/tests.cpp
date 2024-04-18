@@ -98,7 +98,7 @@ void Test::network_train_test() {
   MatrixXd batch(2, 3);
   MatrixXd target(4, 3);
   net.Train(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
-            LearningSpeedId::Linear, {1}, 1, 1);
+            LearningSpeedId::Linear, {1, 2}, 1, 1);
 }
 
 void Test::run_all_tests() {

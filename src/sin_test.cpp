@@ -19,8 +19,8 @@ void sin_test::test() {
   Network net(
       {1, 50, 50, 1},
       {ThresholdId::Default, ThresholdId::Sigmoid, ThresholdId::Default}, 1, 1);
-  net.Train(in_values, target_values, ScoreFunc::create(ScoreId::MSE),
-            network::LearningSpeedId::Linear, {0.15}, 500, 1);
+  net.Train(in_values, target_values, ScoreFunc::create(ScoreId::MAE),
+            network::LearningSpeedId::Const, {0.005}, 1000, 1);
   double score = 0;
   std::uniform_real_distribution<> test_dis(0, M_PI);
   for (int i = 0; i < size; ++i) {
@@ -42,5 +42,5 @@ void sin_test::test() {
   }
   std::ofstream out_file("out.data");
   out_file.write((char *)val.data(), val.size() * sizeof(val[0]));
-  std::cout << "Total score: " << score / size;
+  std::cout << "Total score: " << score / n;
 }
