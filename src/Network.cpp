@@ -43,12 +43,13 @@ Network::VectorXd Network::Calculate(const VectorXd &start_vec) const {
 }
 
 void Network::Train(const MatrixXd &input, const MatrixXd &target,
-                    const ScoreFunc &score_func, LearningSpeedId Id,
-                    vector<double> coef_data, int epoch_num, int batch_size) {
+                    const ScoreFunc &score_func,
+                    const LearningRate &learning_rate, int epoch_num,
+                    int batch_size) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(input.cols() % batch_size == 0 && "Number of batches must be integer");
-  for (Index epoch = 0; epoch < epoch_num; ++epoch) {
+  for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
     for (Index batch_num = 0; batch_num < input.cols() / batch_size;
          ++batch_num) {
@@ -57,10 +58,8 @@ void Network::Train(const MatrixXd &input, const MatrixXd &target,
           input.block(0, start_ind, input.rows(), batch_size);
       const MatrixXd &output_batch =
           target.block(0, start_ind, target.rows(), batch_size);
-      coef_data.push_back(1 + epoch);
       Back_Prop(Forward_Prop(input_batch), output_batch, score_func,
-                CalculateCoef(Id, coef_data));
-      coef_data.pop_back();
+                learning_rate(epoch));
     }
   }
 }

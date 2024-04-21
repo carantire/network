@@ -17,8 +17,10 @@ ThresholdFunc ThresholdFunc::create(ThresholdId threshold) {
     return ThresholdFunc::create<ThresholdId::Sigmoid>();
   case ThresholdId::ReLu:
     return ThresholdFunc::create<ThresholdId::ReLu>();
-  case ThresholdId::SoftMax:
-    return ThresholdFunc::create<ThresholdId::SoftMax>();
+  case ThresholdId::LeakyRelu:
+    return ThresholdFunc::create<ThresholdId::LeakyRelu>();
+  case ThresholdId::Default:
+    return ThresholdFunc::create<ThresholdId::Default>();
   default:
     return ThresholdFunc::create<ThresholdId::Sigmoid>();
   }

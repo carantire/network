@@ -7,7 +7,7 @@
 
 namespace network {
 
-enum class ThresholdId { Sigmoid, ReLu, SoftMax, Default };
+enum class ThresholdId { Sigmoid, ReLu, LeakyRelu, Default };
 
 struct ThresholdDatabase {
   using MatrixXd = Eigen::MatrixXd;
@@ -44,6 +44,21 @@ struct ThresholdDatabase {
   template <> inline double evaluate_1<ThresholdId::ReLu>(double x) {
     return x > 0 ? 1 : 0;
   }
+  template <> inline double evaluate_0<ThresholdId::LeakyRelu>(double x) {
+    return x > 0 ? x : exp(-2) * x;
+  }
+
+  template <> inline double evaluate_1<ThresholdId::LeakyRelu>(double x) {
+    return x > 0 ? 1 : exp(-2);
+  }
+  template <>
+  inline MatrixXd evaluate_0_mat<ThresholdId::LeakyRelu>(const MatrixXd &mat) {
+    return mat.unaryExpr([](double x){return evaluate_0<ThresholdId::LeakyRelu>(x);});
+  }
+  template <>
+  inline MatrixXd evaluate_1_mat<ThresholdId::LeakyRelu>(const MatrixXd &mat) {
+    return mat.unaryExpr([](double x){return evaluate_1<ThresholdId::LeakyRelu>(x);});
+  }
   template <>
   inline MatrixXd evaluate_0_mat<ThresholdId::Default>(const MatrixXd &mat) {
     return mat;
@@ -78,33 +93,7 @@ struct ThresholdDatabase {
         [](double x) { return evaluate_1<ThresholdId::ReLu>(x); });
   }
 
-  template <>
-  inline MatrixXd evaluate_0_mat<ThresholdId::SoftMax>(const MatrixXd &mat) {
-    MatrixXd res(mat.rows(), mat.cols());
-    for (int i = 0; i < mat.cols(); ++i) {
-      VectorXd exp_vec =
-          mat.col(i).unaryExpr([](double el) { return exp(el); });
-      double exp_sum = exp_vec.transpose() * VectorXd::Ones(exp_vec.rows());
-      res.col(i) = exp_vec / exp_sum;
-    }
-    return res;
-  }
 
-  template <>
-  inline MatrixXd evaluate_1_mat<ThresholdId::SoftMax>(const MatrixXd &mat) {
-    MatrixXd res(mat.rows(), mat.cols());
-    for (Index i = 0; i < mat.cols(); ++i) {
-      double max_coeff = mat.col(i).maxCoeff();
-      VectorXd exp_vec = mat.col(i).unaryExpr(
-          [max_coeff](double el) { return exp(el - max_coeff); });
-      assert(std::isfinite(exp_vec.maxCoeff()));
-      double exp_sum = exp_vec.transpose() * VectorXd::Ones(exp_vec.rows());
-      VectorXd c = exp_sum * VectorXd::Ones(exp_vec.rows()) - exp_vec;
-      res.col(i) = c.cwiseProduct(exp_vec / (exp_sum * exp_sum));
-      assert(isfinite(res.col(i).maxCoeff()));
-    }
-    return res;
-  }
 };
 
 class ThresholdFunc {

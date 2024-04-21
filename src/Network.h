@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Layer.h"
+#include "LearningRate.h"
 #include "ScoreFunc.h"
 #include <Eigen/Eigen>
 #include <cmath>
 #include <iostream>
 
 namespace network {
-
-enum class LearningSpeedId { Const, Linear, Exponent };
 
 struct LayerValue {
   using MatrixXd = Eigen::MatrixXd;
@@ -30,30 +29,12 @@ public:
   VectorXd Calculate(const VectorXd &start_vec) const;
 
   void Train(const MatrixXd &input, const MatrixXd &target,
-             const ScoreFunc &score_func, LearningSpeedId id,
-             vector<double> coef_data, int epoch_num, int batch_size);
-
-  double CalculateCoef(LearningSpeedId Id, const vector<double> &coef_data) {
-    switch (Id) {
-    case (LearningSpeedId::Const): {
-      assert(coef_data.size() == 2);
-      return coef_data.front();
-    }
-
-    case (LearningSpeedId::Linear): {
-      assert(coef_data.size() == 3);
-      return coef_data[0] / (coef_data[1] * coef_data[2]);
-    }
-
-    case (LearningSpeedId::Exponent): {
-      assert(coef_data.size() == 3);
-      return coef_data[0] * exp(-coef_data[1] * coef_data[2]);
-    }
-    }
-  }
+             const ScoreFunc &score_func, const LearningRate &learning_rate,
+             int epoch_num, int batch_size);
 
 private:
   vector<Layer> layers_;
+
   vector<LayerValue> Forward_Prop(const MatrixXd &start_vec) const;
   double Back_Prop(const vector<LayerValue> &layer_values,
                    const MatrixXd &target, const ScoreFunc &score_func,
