@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils.h"
 #include <Eigen/Eigen>
 #include <EigenRand/EigenRand>
 #include <cmath>
@@ -10,17 +11,14 @@ namespace network {
 enum class ThresholdId { Sigmoid, ReLu, LeakyRelu, Default };
 
 struct ThresholdDatabase {
-  using MatrixXd = Eigen::MatrixXd;
-  using VectorXd = Eigen::VectorXd;
-  using Index = Eigen::Index;
 
   template <ThresholdId> static double evaluate_0(double);
 
-  template <ThresholdId> static MatrixXd evaluate_0_mat(const MatrixXd &);
+  template <ThresholdId> static Matrix evaluate_0_mat(const Matrix &);
 
   template <ThresholdId> static double evaluate_1(double);
 
-  template <ThresholdId> static MatrixXd evaluate_1_mat(const MatrixXd &);
+  template <ThresholdId> static Matrix evaluate_1_mat(const Matrix &);
 
   template <> inline double evaluate_0<ThresholdId::Sigmoid>(double x) {
 
@@ -52,57 +50,53 @@ struct ThresholdDatabase {
     return x > 0 ? 1 : exp(-2);
   }
   template <>
-  inline MatrixXd evaluate_0_mat<ThresholdId::LeakyRelu>(const MatrixXd &mat) {
-    return mat.unaryExpr([](double x){return evaluate_0<ThresholdId::LeakyRelu>(x);});
+  inline Matrix evaluate_0_mat<ThresholdId::LeakyRelu>(const Matrix &mat) {
+    return mat.unaryExpr(
+        [](double x) { return evaluate_0<ThresholdId::LeakyRelu>(x); });
   }
   template <>
-  inline MatrixXd evaluate_1_mat<ThresholdId::LeakyRelu>(const MatrixXd &mat) {
-    return mat.unaryExpr([](double x){return evaluate_1<ThresholdId::LeakyRelu>(x);});
+  inline Matrix evaluate_1_mat<ThresholdId::LeakyRelu>(const Matrix &mat) {
+    return mat.unaryExpr(
+        [](double x) { return evaluate_1<ThresholdId::LeakyRelu>(x); });
   }
   template <>
-  inline MatrixXd evaluate_0_mat<ThresholdId::Default>(const MatrixXd &mat) {
+  inline Matrix evaluate_0_mat<ThresholdId::Default>(const Matrix &mat) {
     return mat;
   }
 
   template <>
-  inline MatrixXd evaluate_1_mat<ThresholdId::Default>(const MatrixXd &mat) {
+  inline Matrix evaluate_1_mat<ThresholdId::Default>(const Matrix &mat) {
     return mat;
   }
 
   template <>
-  inline MatrixXd evaluate_0_mat<ThresholdId::Sigmoid>(const MatrixXd &mat) {
+  inline Matrix evaluate_0_mat<ThresholdId::Sigmoid>(const Matrix &mat) {
     return mat.unaryExpr(
         [](double x) { return evaluate_0<ThresholdId::Sigmoid>(x); });
   }
 
   template <>
-  inline MatrixXd evaluate_1_mat<ThresholdId::Sigmoid>(const MatrixXd &mat) {
+  inline Matrix evaluate_1_mat<ThresholdId::Sigmoid>(const Matrix &mat) {
     return mat.unaryExpr(
         [](double x) { return evaluate_1<ThresholdId::Sigmoid>(x); });
   }
 
   template <>
-  inline MatrixXd evaluate_0_mat<ThresholdId::ReLu>(const MatrixXd &mat) {
+  inline Matrix evaluate_0_mat<ThresholdId::ReLu>(const Matrix &mat) {
     return mat.unaryExpr(
         [](double x) { return evaluate_0<ThresholdId::ReLu>(x); });
   }
 
   template <>
-  inline MatrixXd evaluate_1_mat<ThresholdId::ReLu>(const MatrixXd &mat) {
+  inline Matrix evaluate_1_mat<ThresholdId::ReLu>(const Matrix &mat) {
     return mat.unaryExpr(
         [](double x) { return evaluate_1<ThresholdId::ReLu>(x); });
   }
-
-
 };
 
 class ThresholdFunc {
-
 public:
-  using MatrixXd = Eigen::MatrixXd;
-  using VectorXd = Eigen::VectorXd;
-
-  using FunctionType = std::function<MatrixXd(const MatrixXd &)>;
+  using FunctionType = std::function<Matrix(const Matrix &)>;
 
   ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1);
 
@@ -113,9 +107,9 @@ public:
 
   static ThresholdFunc create(ThresholdId threshold);
 
-  MatrixXd apply(const MatrixXd &layer_val) const;
+  Matrix apply(const Matrix &layer_val) const;
 
-  MatrixXd derive(const MatrixXd &layer_val) const;
+  Matrix derive(const Matrix &layer_val) const;
 
   bool check_empty();
 

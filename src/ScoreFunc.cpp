@@ -4,43 +4,40 @@
 
 #include "ScoreFunc.h"
 
-using Eigen::MatrixXd;
-
 namespace network {
+
 struct ScoreDatabase {
-  using MatrixXd = Eigen::MatrixXd;
-  using VectorXd = Eigen::VectorXd;
-  template <ScoreId> static double score(const VectorXd &, const VectorXd &);
+  template <ScoreId> static double score(const Vector&, const Vector&);
 
   template <ScoreId>
-  static MatrixXd gradient(const MatrixXd &, const MatrixXd &);
+  static Matrix gradient(const Matrix &, const Matrix &);
 
   template <>
-  inline double score<ScoreId::MSE>(const VectorXd &input,
-                                    const VectorXd &target) {
+  inline double score<ScoreId::MSE>(const Vector&input,
+                                    const Vector&target) {
     return (input - target).dot(input - target);
   }
 
   template <>
-  inline MatrixXd gradient<ScoreId::MSE>(const MatrixXd &input,
-                                         const MatrixXd &target) {
+  inline Matrix gradient<ScoreId::MSE>(const Matrix &input,
+                                         const Matrix &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return 2.0 * (input - target);
   }
 
   template <>
-  inline double score<ScoreId::MAE>(const VectorXd &input,
-                                    const VectorXd &target) {
+  inline double score<ScoreId::MAE>(const Vector&input,
+                                    const Vector&target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
-    return VectorXd::Ones(input.rows()).transpose() *
+    return Vector::Ones(input.rows()).transpose() *
            (input - target).unaryExpr([](double el) { return abs(el); });
   }
 
   template <>
-  inline MatrixXd gradient<ScoreId::MAE>(const MatrixXd &input,
-                                         const MatrixXd &target) {
+  inline Matrix gradient<ScoreId::MAE>(const Matrix &input,
+                                         const Matrix &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return (input - target).unaryExpr([](double el) {
@@ -48,16 +45,16 @@ struct ScoreDatabase {
     });
   }
   template <>
-  inline double score<ScoreId::CrossEntropy>(const VectorXd &input,
-                                             const VectorXd &target) {
+  inline double score<ScoreId::CrossEntropy>(const Vector&input,
+                                             const Vector&target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return -target.transpose() *
            input.unaryExpr([](double el) { return log(el); });
   }
   template <>
-  inline MatrixXd gradient<ScoreId::CrossEntropy>(const MatrixXd &input,
-                                                  const MatrixXd &target) {
+  inline Matrix gradient<ScoreId::CrossEntropy>(const Matrix &input,
+                                                  const Matrix &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return -target.cwiseProduct(
@@ -92,12 +89,12 @@ ScoreFunc ScoreFunc::create(ScoreId score) {
   }
 }
 
-double ScoreFunc::score(const VectorXd &input, const VectorXd &target) const {
+double ScoreFunc::score(const Vector&input, const Vector&target) const {
   return score_func_(input, target);
 }
 
-Eigen::MatrixXd ScoreFunc::gradient(const MatrixXd &input,
-                                    const MatrixXd &target) const {
+Matrix ScoreFunc::gradient(const Matrix &input,
+                                    const Matrix &target) const {
   return gradient_func_(input, target);
 }
 

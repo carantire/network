@@ -5,8 +5,6 @@
 #include "ThresholdFunc.h"
 
 namespace network {
-using VectorXd = ThresholdFunc::VectorXd;
-using MatrixXd = ThresholdFunc::MatrixXd;
 
 ThresholdFunc::ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1)
     : evaluate_0_(std::move(evaluate_0)), evaluate_1_(std::move(evaluate_1)) {}
@@ -26,12 +24,12 @@ ThresholdFunc ThresholdFunc::create(ThresholdId threshold) {
   }
 }
 
-MatrixXd ThresholdFunc::apply(const MatrixXd &layer_val) const {
+Matrix ThresholdFunc::apply(const Matrix &layer_val) const {
   assert(evaluate_0_ && "empty apply function");
   return evaluate_0_(layer_val);
 }
 
-MatrixXd ThresholdFunc::derive(const MatrixXd &layer_val) const {
+Matrix ThresholdFunc::derive(const Matrix &layer_val) const {
   assert(evaluate_1_ && "empty derive function");
   return evaluate_1_(layer_val);
 }

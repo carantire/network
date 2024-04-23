@@ -1,6 +1,3 @@
-//
-// Created by Denis Ryapolov on 06.01.2024.
-//
 #include "Network.h"
 #include "ThresholdFunc.h"
 
@@ -19,11 +16,11 @@ Network::Network(std::initializer_list<int> dimensions,
   }
 }
 
-Network::vector<LayerValue>
-Network::Forward_Prop(const MatrixXd &start_mat) const {
-  vector<LayerValue> layer_values(layers_.size());
-  MatrixXd cur_mat = start_mat;
-  for (size_t i = 0; i < layers_.size(); ++i) {
+std::vector<LayerValue>
+Network::Forward_Prop(const Matrix &start_mat) const {
+  std::vector<LayerValue> layer_values(layers_.size());
+  Matrix cur_mat = start_mat;
+  for (Index i = 0; i < layers_.size(); ++i) {
     layer_values[i].in = cur_mat;
     cur_mat = layers_[i].apply_linear(cur_mat);
     layer_values[i].out = cur_mat;
@@ -32,7 +29,7 @@ Network::Forward_Prop(const MatrixXd &start_mat) const {
   return layer_values;
 }
 
-Network::VectorXd Network::Calculate(const VectorXd &start_vec) const {
+Vector Network::Calculate(const Vector&start_vec) const {
   assert(start_vec.rows() == layers_.front().Get_Input_Dim());
   auto cur_mat = start_vec;
   for (size_t i = 0; i < layers_.size(); ++i) {
@@ -42,7 +39,7 @@ Network::VectorXd Network::Calculate(const VectorXd &start_vec) const {
   return cur_mat;
 }
 
-void Network::Train(const MatrixXd &input, const MatrixXd &target,
+void Network::Train(const Matrix &input, const Matrix &target,
                     const ScoreFunc &score_func,
                     const LearningRate &learning_rate, int epoch_num,
                     int batch_size) {
@@ -54,9 +51,9 @@ void Network::Train(const MatrixXd &input, const MatrixXd &target,
     for (Index batch_num = 0; batch_num < input.cols() / batch_size;
          ++batch_num) {
       Index start_ind = batch_num * batch_size;
-      const MatrixXd &input_batch =
+      const Matrix &input_batch =
           input.block(0, start_ind, input.rows(), batch_size);
-      const MatrixXd &output_batch =
+      const Matrix &output_batch =
           target.block(0, start_ind, target.rows(), batch_size);
       Back_Prop(Forward_Prop(input_batch), output_batch, score_func,
                 learning_rate(epoch));
@@ -65,7 +62,7 @@ void Network::Train(const MatrixXd &input, const MatrixXd &target,
 }
 
 double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
-                          const MatrixXd &target, const ScoreFunc &score_func,
+                          const Matrix &target, const ScoreFunc &score_func,
                           double step) {
   auto grad = GetGradMatrix(layer_values.back().out, target, score_func);
   for (int i = layers_.size() - 1; i >= 0; --i) {
@@ -73,18 +70,18 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
     grad = layers_[i].gradx(grad, layer_values[i].out);
   }
-  return VectorXd::Ones(grad.rows()).transpose() *
-         (grad * VectorXd::Ones(grad.cols()) / grad.cols())
+  return Vector::Ones(grad.rows()).transpose() *
+         (grad * Vector::Ones(grad.cols()) / grad.cols())
              .unaryExpr([](double el) { return abs(el); });
 }
 
-Network::MatrixXd Network::GetGradMatrix(const MatrixXd &input,
-                                         const MatrixXd &target,
+Matrix Network::GetGradMatrix(const Matrix &input,
+                                         const Matrix &target,
                                          const ScoreFunc &score_func) const {
 
   auto final_mat = layers_.back().apply_threshold(input);
   assert(final_mat.size() == target.size());
-  MatrixXd res = score_func.gradient(final_mat, target);
+  Matrix res = score_func.gradient(final_mat, target);
   return res;
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ThresholdFunc.h"
+#include "utils.h"
 #include <Eigen/Dense>
 #include <EigenRand/EigenRand>
 #include <utility>
@@ -9,40 +10,38 @@ namespace network {
 
 class Layer {
 public:
-  using MatrixXd = Eigen::MatrixXd;
-  using VectorXd = Eigen::VectorXd;
-  using Index = Eigen::Index;
   using RandGen = Eigen::Rand::Vmt19937_64;
 
-  Layer(ThresholdId id, Index in_size, Index out_size, int seed, double normalize);
+  Layer(ThresholdId id, Index in_size, Index out_size, int seed,
+        double normalize);
 
-  MatrixXd apply_linear(const MatrixXd &values) const;
+  Matrix apply_linear(const Matrix &values) const;
 
-  MatrixXd apply_threshold(const MatrixXd &value) const;
+  Matrix apply_threshold(const Matrix &value) const;
 
-  MatrixXd derive(const MatrixXd &applied_values) const;
+  Matrix derive(const Matrix &applied_values) const;
 
-  MatrixXd derive_mat(const MatrixXd &applied_values,
-                      const MatrixXd &grad) const;
+  Matrix derive_mat(const Matrix &applied_values, const Matrix &grad) const;
 
-  MatrixXd gradx(const MatrixXd &grad, const MatrixXd &applied_values) const;
+  Matrix gradx(const Matrix &grad, const Matrix &applied_values) const;
 
-  void apply_gradA(const MatrixXd &values, const MatrixXd &grad,
-                   const MatrixXd &applied_values, double step);
+  void apply_gradA(const Matrix &values, const Matrix &grad,
+                   const Matrix &applied_values, double step);
 
-  void apply_gradb(const MatrixXd &grad, const MatrixXd &applied_values,
+  void apply_gradb(const Matrix &grad, const Matrix &applied_values,
                    double step);
 
   Index Get_Input_Dim() const;
 
-  MatrixXd Get_Mat() const;
+  Matrix Get_Mat() const;
 
 private:
-  static MatrixXd getNormal(Index rows, Index columns, int seed, double normalize);
+  static Matrix getNormal(Index rows, Index columns, int seed,
+                          double normalize);
 
   ThresholdFunc ThresholdFunc_;
 
-  MatrixXd A_;
-  VectorXd b_;
+  Matrix A_;
+  Vector b_;
 };
 } // namespace network
