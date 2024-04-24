@@ -7,11 +7,11 @@
 
 namespace network {
 
-
-Layer::Layer(ThresholdId id, Index in_size, Index out_size, int seed, double normalize)
+Layer::Layer(ThresholdId id, Index in_size, Index out_size, int seed,
+             double normalize)
     : ThresholdFunc_(ThresholdFunc::create(id)),
-      A_(getNormal(out_size, in_size, seed, normalize)), b_(getNormal(out_size, 1, seed, normalize)) {
-}
+      A_(getNormal(out_size, in_size, seed, normalize)),
+      b_(getNormal(out_size, 1, seed, normalize)) {}
 
 Matrix Layer::apply_linear(const Matrix &x) const {
 
@@ -27,7 +27,7 @@ Matrix Layer::derive(const Matrix &applied_values) const {
 }
 
 Matrix Layer::derive_mat(const Matrix &applied_values_mat,
-                           const Matrix &grad) const {
+                         const Matrix &grad) const {
   return (derive(applied_values_mat).cwiseProduct(grad)).eval();
 }
 

@@ -11,4 +11,4 @@ LearningRate Linear(double c1) {
 LearningRate Constant(double c1) {
   return [=](int epoch) { return c1; };
 }
-}
+} // namespace network::LearningRateDatabase

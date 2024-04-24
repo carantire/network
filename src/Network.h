@@ -20,7 +20,7 @@ public:
           std::initializer_list<ThresholdId> threshold_id, int seed,
           double normalize);
 
-  Vector Calculate(const Vector& start_vec) const;
+  Vector Calculate(const Vector &start_vec) const;
 
   void Train(const Matrix &input, const Matrix &target,
              const ScoreFunc &score_func, const LearningRate &learning_rate,
@@ -34,6 +34,6 @@ private:
                    const Matrix &target, const ScoreFunc &score_func,
                    double step);
   Matrix GetGradMatrix(const Matrix &input, const Matrix &target,
-                         const ScoreFunc &score_func) const;
+                       const ScoreFunc &score_func) const;
 };
 } // namespace network

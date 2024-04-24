@@ -16,8 +16,7 @@ Network::Network(std::initializer_list<int> dimensions,
   }
 }
 
-std::vector<LayerValue>
-Network::Forward_Prop(const Matrix &start_mat) const {
+std::vector<LayerValue> Network::Forward_Prop(const Matrix &start_mat) const {
   std::vector<LayerValue> layer_values(layers_.size());
   Matrix cur_mat = start_mat;
   for (Index i = 0; i < layers_.size(); ++i) {
@@ -29,7 +28,7 @@ Network::Forward_Prop(const Matrix &start_mat) const {
   return layer_values;
 }
 
-Vector Network::Calculate(const Vector&start_vec) const {
+Vector Network::Calculate(const Vector &start_vec) const {
   assert(start_vec.rows() == layers_.front().Get_Input_Dim());
   auto cur_mat = start_vec;
   for (size_t i = 0; i < layers_.size(); ++i) {
@@ -75,9 +74,8 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
              .unaryExpr([](double el) { return abs(el); });
 }
 
-Matrix Network::GetGradMatrix(const Matrix &input,
-                                         const Matrix &target,
-                                         const ScoreFunc &score_func) const {
+Matrix Network::GetGradMatrix(const Matrix &input, const Matrix &target,
+                              const ScoreFunc &score_func) const {
 
   auto final_mat = layers_.back().apply_threshold(input);
   assert(final_mat.size() == target.size());
