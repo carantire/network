@@ -1,10 +1,15 @@
-Для сборки нужно написать
+## Сборка
 
+Сборка с оптимизациями:
+
+```sh
 сmake -DCMAKE_BUILD_TYPE=Release -B release
-
 make --directory release
+```
 
-release/mnist_train - для обучения MNIST
+В директории `release/` будет несколько исполняемых файлов:
 
-release/sin_train - для обучения sin
 
+- тесты к библиотеке: `network_test`
+- пример обучения на функции `sin`: `sin_train`
+- обучения на `MNIST`: `mnist_train`
