@@ -99,7 +99,7 @@ void network_train_test() {
                      1, 1);
   Matrix batch(2, 3);
   Matrix target(4, 3);
-  net.Train(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
+  net.Train_GD(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
             network::LearningRateDatabase::Constant(1), 1, 1);
 }
 } // namespace

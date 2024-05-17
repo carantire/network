@@ -4,6 +4,7 @@
 
 #include "Layer.h"
 #include <iostream>
+#include "utils.h"
 
 namespace network {
 
@@ -60,9 +61,8 @@ void Layer::apply_gradb(const Matrix &grad, const Matrix &applied_val,
                   .eval();
   b_ -= step * diff;
 }
-
-Layer::RandGen &getUrng(int seed) {
-  static Layer::RandGen urng = seed;
+RandGen &getUrng(int seed) {
+  static RandGen urng = seed;
   return urng;
 }
 

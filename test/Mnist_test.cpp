@@ -35,8 +35,8 @@ int main() {
 
   Matrix input = Mnist_input(dataset.training_images);
   Matrix target = Mnist_output(dataset.training_labels);
-  net.Train(input, target, ScoreFunc::create(ScoreId::MSE),
-            LearningRateDatabase::Constant(0.1), 10, 30);
+  net.Train_GD(input, target, ScoreFunc::create(ScoreId::MSE),
+               LearningRateDatabase::Constant(0.1), 10, 30);
 
   int correct = 0;
   std::cout << '\n';

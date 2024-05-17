@@ -38,15 +38,25 @@ Vector Network::Calculate(const Vector &start_vec) const {
   return cur_mat;
 }
 
-void Network::Train(const Matrix &input, const Matrix &target,
-                    const ScoreFunc &score_func,
-                    const LearningRate &learning_rate, int epoch_num,
-                    int batch_size) {
+void Network::ShuffleData(Matrix &input, Matrix &target) {
+  std::random_device rd;
+  Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> perm(input.cols());
+  perm.setIdentity();
+  std::shuffle(perm.indices().data(),
+               perm.indices().data() + perm.indices().size(), rd);
+  input *= perm;
+  target *= perm;
+}
+
+void Network::Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
+                       const LearningRate &learning_rate, int epoch_num,
+                       int batch_size) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(input.cols() % batch_size == 0 && "Number of batches must be integer");
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
+    ShuffleData(input, target);
     for (Index batch_num = 0; batch_num < input.cols() / batch_size;
          ++batch_num) {
       Index start_ind = batch_num * batch_size;
@@ -55,6 +65,28 @@ void Network::Train(const Matrix &input, const Matrix &target,
       const Matrix &output_batch =
           target.block(0, start_ind, target.rows(), batch_size);
       Back_Prop(Forward_Prop(input_batch), output_batch, score_func,
+                learning_rate(epoch));
+    }
+  }
+}
+
+void Network::Train_SGD(Matrix input, Matrix target,
+                        const ScoreFunc &score_func,
+                        const LearningRate &learning_rate, int epoch_num,
+                        int sample_size) {
+  assert(input.cols() == target.cols() &&
+         "Target size must coincide with batch size");
+  assert(sample_size <= input.cols() &&
+         "Sample size must be less or equal to dataset size");
+//  ShuffleData(input, target);
+  for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
+    std::cout << "Epoch num: " << epoch << '\n';
+
+    for (Index el_num = 0; el_num < sample_size; ++el_num) {
+      Index start_ind = el_num;
+      const Matrix &input_el = input.block(0, start_ind, input.rows(), 1);
+      const Matrix &output_el = target.block(0, start_ind, target.rows(), 1);
+      Back_Prop(Forward_Prop(input_el), output_el, score_func,
                 learning_rate(epoch));
     }
   }
@@ -78,6 +110,9 @@ Matrix Network::GetGradMatrix(const Matrix &input, const Matrix &target,
                               const ScoreFunc &score_func) const {
 
   auto final_mat = layers_.back().apply_threshold(input);
+  if (final_mat.size() != target.size()) {
+    std::cout << final_mat.rows() << " " << target.rows() << '\n';
+  }
   assert(final_mat.size() == target.size());
   Matrix res = score_func.gradient(final_mat, target);
   return res;

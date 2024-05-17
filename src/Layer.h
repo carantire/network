@@ -10,7 +10,6 @@ namespace network {
 
 class Layer {
 public:
-  using RandGen = Eigen::Rand::Vmt19937_64;
 
   Layer(ThresholdId id, Index in_size, Index out_size, int seed,
         double normalize);

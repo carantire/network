@@ -14,6 +14,11 @@ struct LayerValue {
   Matrix out;
 };
 
+struct Batch {
+  const Matrix &input;
+  const Matrix &target;
+};
+
 class Network {
 public:
   Network(std::initializer_list<int> dimensions,
@@ -22,9 +27,12 @@ public:
 
   Vector Calculate(const Vector &start_vec) const;
 
-  void Train(const Matrix &input, const Matrix &target,
-             const ScoreFunc &score_func, const LearningRate &learning_rate,
-             int epoch_num, int batch_size);
+  void Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
+                const LearningRate &learning_rate, int epoch_num,
+                int batch_size);
+  void Train_SGD(Matrix input, Matrix target, const ScoreFunc &score_func,
+                 const LearningRate &learning_rate, int epoch_num,
+                 int sample_size);
 
 private:
   std::vector<Layer> layers_;
@@ -35,5 +43,6 @@ private:
                    double step);
   Matrix GetGradMatrix(const Matrix &input, const Matrix &target,
                        const ScoreFunc &score_func) const;
+  void ShuffleData(Matrix &input, Matrix &target);
 };
 } // namespace network

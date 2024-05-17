@@ -22,7 +22,7 @@ int main() {
   Network net(
       {1, 50, 50, 1},
       {ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::Sigmoid}, 1, 1);
-  net.Train(in_values, target_values, ScoreFunc::create(ScoreId::MAE),
+  net.Train_GD(in_values, target_values, ScoreFunc::create(ScoreId::MAE),
             network::LearningRateDatabase::Constant(0.005), 100, 1);
   double score = 0;
   std::uniform_real_distribution<> test_dis(0, M_PI);
