@@ -92,7 +92,7 @@ void network_constructor_test() {
       Network({2, 3, 4}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1, 1);
 }
 
-void network_train_test() {
+void network_train_gd_test() {
   auto net = Network({2, 3, 4, 5, 4},
                      {ThresholdId::ReLu, ThresholdId::Sigmoid,
                       ThresholdId::Sigmoid, ThresholdId::LeakyRelu},
@@ -101,6 +101,35 @@ void network_train_test() {
   Matrix target(4, 3);
   net.Train_GD(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
             network::LearningRateDatabase::Constant(1), 1, 1);
+}
+void network_train_sgd_test(){
+  auto net = Network({2, 3, 4, 5, 4},
+                     {ThresholdId::ReLu, ThresholdId::Sigmoid,
+                      ThresholdId::Sigmoid, ThresholdId::LeakyRelu},
+                     1, 1);
+  Matrix batch(2, 3);
+  Matrix target(4, 3);
+  net.Train_SGD(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
+               network::LearningRateDatabase::Constant(1), 1, 1);
+}
+void network_train_readwrite_test(){
+  auto net = Network({2, 3, 4, 5, 4},
+                     {ThresholdId::ReLu, ThresholdId::Sigmoid,
+                      ThresholdId::Sigmoid, ThresholdId::LeakyRelu},
+                     1, 1);
+  Matrix batch(2, 3);
+  Matrix target(4, 3);
+  net.Train_GD(batch, target, ScoreFunc::create(ScoreId::MAE),
+                network::LearningRateDatabase::Constant(1), 100, 1);
+  net.StoreModel("test_data.data");
+  auto net_loaded = net.LoadModel("test_data.data");
+  Vector vec1 {0, 1};
+  Vector vec2{-1, 3};
+  Vector vec3 {100, -500};
+  assert(abs((net.Calculate(vec1) - net_loaded.Calculate(vec1)).maxCoeff()) < 1e-8);
+  assert(abs((net.Calculate(vec2) - net_loaded.Calculate(vec2)).maxCoeff()) < 1e-8);
+  assert(abs((net.Calculate(vec3) - net_loaded.Calculate(vec3)).maxCoeff()) < 1e-8);
+
 }
 } // namespace
 
@@ -118,5 +147,7 @@ void test::run_all_tests() {
   layer_grad_test();
 
   network_constructor_test();
-  network_train_test();
+  network_train_gd_test();
+  network_train_sgd_test();
+  network_train_readwrite_test();
 }

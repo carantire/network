@@ -12,11 +12,7 @@ namespace network {
 struct LayerValue {
   Matrix in;
   Matrix out;
-};
-
-struct Batch {
-  const Matrix &input;
-  const Matrix &target;
+  Matrix inert;
 };
 
 class Network {
@@ -24,7 +20,6 @@ public:
   Network(std::initializer_list<int> dimensions,
           std::initializer_list<ThresholdId> threshold_id, int seed,
           double normalize);
-  Network(std::vector<Layer> layers);
 
   Vector Calculate(const Vector &start_vec) const;
 
@@ -48,5 +43,8 @@ public:
   Matrix GetGradMatrix(const Matrix &input, const Matrix &target,
                        const ScoreFunc &score_func) const;
   void ShuffleData(Matrix &input, Matrix &target);
+
+private:
+  Network(std::vector<Layer> &&layers);
 };
 } // namespace network

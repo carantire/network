@@ -30,34 +30,43 @@ int main() {
       mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(
           MNIST_DATA_LOCATION);
 
-  Network net_store({784, 512, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
-              1. / 12);
+  Network net_store({784, 512, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid},
+                    42, 1. / 12);
 
   Matrix input = Mnist_input(dataset.training_images);
   Matrix target = Mnist_output(dataset.training_labels);
   net_store.Train_GD(input, target, ScoreFunc::create(ScoreId::MSE),
-               LearningRateDatabase::Constant(0.1), 10, 30);
+                     LearningRateDatabase::Constant(0.07), 10, 20);
   net_store.StoreModel("out.data");
   Network net = Network::LoadModel("out.data");
 
   int correct = 0;
   std::cout << '\n';
   auto test_input = Mnist_input(dataset.test_images);
-  vector<int> mistake(10, 0);
+  vector<int> FP(10, 0);
+  vector<int> FN(10, 0);
   vector<int> average(10, 0);
-  for (int i = 0; i < 10000; ++i) {
+  for (int i = 0; i < dataset.test_labels.size(); ++i) {
     auto res = net.Calculate(test_input.col(i));
     int max_ind = 0;
     double max_val = res.maxCoeff(&max_ind);
     correct += max_ind == dataset.test_labels[i];
     if (max_ind != dataset.test_labels[i]) {
-      ++mistake[dataset.test_labels[i]];
+      ++FN[dataset.test_labels[i]];
+      ++FP[max_ind];
     }
     ++average[dataset.test_labels[i]];
   }
   std::cout << "Correct results out of 10000: " << correct << '\n';
-  for (int i = 0; i < 10; ++i) {
-    std::cout << "mistakes while predicting " << i << ": "
-              << 100 * double(mistake[i]) / average[i] << "%" << '\n';
+  std::cout << "Accuracy: "
+            << 100 * double(correct) / dataset.test_labels.size() << "%\n";
+  double F1 = 0;
+  for (int i = 0; i <= 9; ++i) {
+    double precision = double((average[i] - FP[i])) / (average[i] - FP[i] + FN[i]);
+    double recall = double((average[i] - FP[i])) / (average[i]);
+    assert(isfinite(precision));
+    assert(isfinite(recall));
+    F1 += (2 * precision * recall / (precision + recall)) * (double(average[i]) / dataset.test_labels.size());
   }
+  std::cout << "F1: " <<  100 * F1 << "%" << '\n';
 }

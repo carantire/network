@@ -16,7 +16,7 @@ Network::Network(std::initializer_list<int> dimensions,
   }
 }
 
-Network::Network(std::vector<Layer> layers): layers_(std::move(layers)){};
+Network::Network(std::vector<Layer> && layers): layers_(layers){};
 
 std::vector<LayerValue> Network::Forward_Prop(const Matrix &start_mat) const {
   std::vector<LayerValue> layer_values(layers_.size());
@@ -80,10 +80,10 @@ void Network::Train_SGD(Matrix input, Matrix target,
          "Target size must coincide with batch size");
   assert(sample_size <= input.cols() &&
          "Sample size must be less or equal to dataset size");
-  //  ShuffleData(input, target);
+
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
-
+    ShuffleData(input, target);
     for (Index el_num = 0; el_num < sample_size; ++el_num) {
       Index start_ind = el_num;
       const Matrix &input_el = input.block(0, start_ind, input.rows(), 1);
@@ -143,5 +143,6 @@ Matrix Network::GetGradMatrix(const Matrix &input, const Matrix &target,
   Matrix res = score_func.gradient(final_mat, target);
   return res;
 }
+
 
 } // namespace network

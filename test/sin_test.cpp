@@ -6,9 +6,8 @@
 
 int main() {
   using namespace network;
-
   std::random_device rd;
-  std::mt19937 gen(42);
+  std::mt19937 gen(1);
   std::uniform_real_distribution<> train_dis(-M_PI / 2, M_PI + M_PI / 2);
   int size = 10000;
   Matrix in_values(1, size);
@@ -41,8 +40,5 @@ int main() {
     test_input << i * M_PI / n;
     val[i] = net.Calculate(test_input)(0, 0);
   }
-  std::ofstream out_file("out.data");
-  out_file.write((char *)val.data(), val.size() * sizeof(val[0]));
-  out_file.close();
-  std::cout << "Total score: " << score / size;
+  std::cout << "Accuracy: " << 100*(1 - score / size) << "%";
 }

@@ -18,10 +18,6 @@ public:
 
   Matrix apply_threshold(const Matrix &value) const;
 
-  Matrix derive(const Matrix &applied_values) const;
-
-  Matrix derive_mat(const Matrix &applied_values, const Matrix &grad) const;
-
   Matrix gradx(const Matrix &grad, const Matrix &applied_values) const;
 
   void apply_gradA(const Matrix &values, const Matrix &grad,
@@ -41,6 +37,10 @@ public:
 private:
   static Matrix getNormal(Index rows, Index columns, int seed,
                           double normalize);
+
+  Matrix derive(const Matrix &applied_values) const;
+
+  Matrix derive_mat(const Matrix &applied_values, const Matrix &grad) const;
 
   ThresholdFunc ThresholdFunc_;
 
