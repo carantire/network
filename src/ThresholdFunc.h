@@ -98,11 +98,11 @@ class ThresholdFunc {
 public:
   using FunctionType = std::function<Matrix(const Matrix &)>;
 
-  ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1);
+  ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1, ThresholdId Id);
 
   template <ThresholdId Id> static ThresholdFunc create() {
     return ThresholdFunc(ThresholdDatabase::evaluate_0_mat<Id>,
-                         ThresholdDatabase::evaluate_1_mat<Id>);
+                         ThresholdDatabase::evaluate_1_mat<Id>, Id);
   }
 
   static ThresholdFunc create(ThresholdId threshold);
@@ -111,10 +111,13 @@ public:
 
   Matrix derive(const Matrix &layer_val) const;
 
+  ThresholdId GetId() const;
+
   bool check_empty();
 
 private:
   FunctionType evaluate_0_;
   FunctionType evaluate_1_;
+  ThresholdId Id_;
 };
 } // namespace network

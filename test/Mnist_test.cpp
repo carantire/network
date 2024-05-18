@@ -30,13 +30,15 @@ int main() {
       mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(
           MNIST_DATA_LOCATION);
 
-  Network net({784, 256, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
+  Network net_store({784, 256, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
               1. / 12);
 
   Matrix input = Mnist_input(dataset.training_images);
   Matrix target = Mnist_output(dataset.training_labels);
-  net.Train_GD(input, target, ScoreFunc::create(ScoreId::MSE),
+  net_store.Train_GD(input, target, ScoreFunc::create(ScoreId::MSE),
                LearningRateDatabase::Constant(0.1), 10, 30);
+  net_store.StoreModel("out.data");
+  Network net = Network::LoadModel("out.data");
 
   int correct = 0;
   std::cout << '\n';
@@ -55,7 +57,7 @@ int main() {
   }
   std::cout << "Correct results out of 10000: " << correct << '\n';
   for (int i = 0; i < 10; ++i) {
-    std::cout << "mistakes while predicting " << i << " :"
+    std::cout << "mistakes while predicting " << i << ": "
               << 100 * double(mistake[i]) / average[i] << "%" << '\n';
   }
 }

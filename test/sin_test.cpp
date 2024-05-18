@@ -43,5 +43,6 @@ int main() {
   }
   std::ofstream out_file("out.data");
   out_file.write((char *)val.data(), val.size() * sizeof(val[0]));
+  out_file.close();
   std::cout << "Total score: " << score / size;
 }

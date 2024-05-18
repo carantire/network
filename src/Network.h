@@ -24,6 +24,7 @@ public:
   Network(std::initializer_list<int> dimensions,
           std::initializer_list<ThresholdId> threshold_id, int seed,
           double normalize);
+  Network(std::vector<Layer> layers);
 
   Vector Calculate(const Vector &start_vec) const;
 
@@ -34,7 +35,10 @@ public:
                  const LearningRate &learning_rate, int epoch_num,
                  int sample_size);
 
-private:
+  void StoreModel(const std::filesystem::path &path);
+
+  static Network LoadModel(const std::filesystem::path &path);
+
   std::vector<Layer> layers_;
 
   std::vector<LayerValue> Forward_Prop(const Matrix &start_vec) const;

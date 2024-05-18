@@ -16,6 +16,8 @@ Network::Network(std::initializer_list<int> dimensions,
   }
 }
 
+Network::Network(std::vector<Layer> layers): layers_(std::move(layers)){};
+
 std::vector<LayerValue> Network::Forward_Prop(const Matrix &start_mat) const {
   std::vector<LayerValue> layer_values(layers_.size());
   Matrix cur_mat = start_mat;
@@ -78,7 +80,7 @@ void Network::Train_SGD(Matrix input, Matrix target,
          "Target size must coincide with batch size");
   assert(sample_size <= input.cols() &&
          "Sample size must be less or equal to dataset size");
-//  ShuffleData(input, target);
+  //  ShuffleData(input, target);
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
 
@@ -92,11 +94,35 @@ void Network::Train_SGD(Matrix input, Matrix target,
   }
 }
 
+void Network::StoreModel(const std::filesystem::path &path) {
+  auto out_file = std::ofstream(
+      path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+  assert(out_file && "Problem with output file");
+  assert(out_file.is_open() && "Output file is not open");
+  uint32_t layers_num = layers_.size();
+  out_file.write((char *)&layers_num, sizeof(layers_num));
+  for (const auto &layer : layers_) {
+    layer.WriteParams(out_file);
+  }
+}
+
+Network Network::LoadModel(const std::filesystem::path &path) {
+  auto in_file = std::ifstream(path, std::ios_base::binary | std::ios_base::in);
+  uint32_t layers_num;
+  in_file.read((char *)&layers_num, sizeof(layers_num));
+  std::vector<Layer> layers;
+  layers.reserve(layers_num);
+  for (uint32_t i = 0; i < layers_num; ++i) {
+    layers.push_back(Layer::ReadParams(in_file));
+  }
+  return Network(std::move(layers));
+}
+
 double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
                           const Matrix &target, const ScoreFunc &score_func,
                           double step) {
   auto grad = GetGradMatrix(layer_values.back().out, target, score_func);
-  for (int i = layers_.size() - 1; i >= 0; --i) {
+  for (Index i = layers_.size() - 1; i >= 0; --i) {
     layers_[i].apply_gradA(layer_values[i].in, grad, layer_values[i].out, step);
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
     grad = layers_[i].gradx(grad, layer_values[i].out);

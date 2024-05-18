@@ -6,8 +6,10 @@
 
 namespace network {
 
-ThresholdFunc::ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1)
-    : evaluate_0_(std::move(evaluate_0)), evaluate_1_(std::move(evaluate_1)) {}
+ThresholdFunc::ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1,
+                             ThresholdId Id)
+    : evaluate_0_(std::move(evaluate_0)), evaluate_1_(std::move(evaluate_1)),
+      Id_(Id) {}
 
 ThresholdFunc ThresholdFunc::create(ThresholdId threshold) {
   switch (threshold) {
@@ -34,5 +36,7 @@ Matrix ThresholdFunc::derive(const Matrix &layer_val) const {
   return evaluate_1_(layer_val);
 }
 
-bool ThresholdFunc::check_empty() { return evaluate_0_ && evaluate_1_; };
+bool ThresholdFunc::check_empty() { return evaluate_0_ && evaluate_1_; }
+
+ThresholdId ThresholdFunc::GetId() const { return Id_; };
 } // namespace network

@@ -30,6 +30,10 @@ public:
   void apply_gradb(const Matrix &grad, const Matrix &applied_values,
                    double step);
 
+  void WriteParams(std::ofstream &out) const;
+
+  static Layer ReadParams(std::ifstream &in);
+
   Index Get_Input_Dim() const;
 
   Matrix Get_Mat() const;

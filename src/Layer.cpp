@@ -3,8 +3,8 @@
 //
 
 #include "Layer.h"
-#include <iostream>
 #include "utils.h"
+#include <iostream>
 
 namespace network {
 
@@ -75,5 +75,29 @@ Matrix Layer::getNormal(Index rows, Index columns, int seed, double normalize) {
 Index Layer::Get_Input_Dim() const { return A_.cols(); };
 
 Matrix Layer::Get_Mat() const { return A_; }
+
+Layer Layer::ReadParams(std::ifstream &in) {
+  ThresholdId Id;
+  Index in_size, out_size;
+  in.read(reinterpret_cast<char*>(&Id), sizeof(Id));
+  in.read(reinterpret_cast<char*>(&in_size), sizeof(in_size));
+  in.read(reinterpret_cast<char*>(&out_size), sizeof(out_size));
+  Layer layer = Layer(Id, in_size, out_size, 1, 1.);
+  in.read((char *)layer.A_.data(),
+          in_size * out_size * sizeof(typename Matrix::Scalar));
+  in.read((char *)layer.b_.data(), out_size * 1 * sizeof(typename Vector::Scalar));
+  return layer;
+}
+
+void Layer::WriteParams(std::ofstream &out) const {
+  typename Matrix::Index rows = A_.rows();
+  typename Matrix::Index cols = A_.cols();
+  ThresholdId Id = ThresholdFunc_.GetId();
+  out.write(reinterpret_cast<char*>(&Id), sizeof(Id));
+  out.write(reinterpret_cast<char*>(&cols), sizeof(cols));
+  out.write(reinterpret_cast<char*>(&rows), sizeof(rows));
+  out.write((char *)A_.data(), rows * cols * sizeof(typename Matrix::Scalar));
+  out.write((char *)b_.data(), rows * 1 * sizeof(typename Vector ::Scalar));
+}
 
 } // namespace network
