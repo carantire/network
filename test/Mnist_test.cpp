@@ -30,7 +30,7 @@ int main() {
       mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>(
           MNIST_DATA_LOCATION);
 
-  Network net_store({784, 256, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
+  Network net_store({784, 512, 10}, {ThresholdId::ReLu, ThresholdId::Sigmoid}, 1,
               1. / 12);
 
   Matrix input = Mnist_input(dataset.training_images);
