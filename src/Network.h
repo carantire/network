@@ -12,7 +12,6 @@ namespace network {
 struct LayerValue {
   Matrix in;
   Matrix out;
-  Matrix inert;
 };
 
 class Network {
@@ -34,6 +33,9 @@ public:
 
   static Network LoadModel(const std::filesystem::path &path);
 
+
+private:
+  Network(std::vector<Layer> &&layers);
   std::vector<Layer> layers_;
 
   std::vector<LayerValue> Forward_Prop(const Matrix &start_vec) const;
@@ -43,8 +45,5 @@ public:
   Matrix GetGradMatrix(const Matrix &input, const Matrix &target,
                        const ScoreFunc &score_func) const;
   void ShuffleData(Matrix &input, Matrix &target);
-
-private:
-  Network(std::vector<Layer> &&layers);
 };
 } // namespace network
