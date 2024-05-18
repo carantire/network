@@ -5,9 +5,8 @@
 ```sh
 сmake -DCMAKE_BUILD_TYPE=Release -B release
 make --directory release
-
-При этом GCC не поддерживается.
 ```
+При этом GCC не поддерживается.
 
 В директории `release/` будет несколько исполняемых файлов:
 
