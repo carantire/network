@@ -6,6 +6,7 @@
 #include <Eigen/Eigen>
 #include <cmath>
 #include <iostream>
+#include <filesystem>
 
 namespace network {
 
@@ -24,10 +25,10 @@ public:
 
   void Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
                 const LearningRate &learning_rate, int epoch_num,
-                int batch_size);
+                int batch_size, int seed);
   void Train_SGD(Matrix input, Matrix target, const ScoreFunc &score_func,
                  const LearningRate &learning_rate, int epoch_num,
-                 int sample_size);
+                 int sample_size, int seed);
 
   void StoreModel(const std::filesystem::path &path);
 
@@ -44,6 +45,6 @@ private:
                    double step);
   Matrix GetGradMatrix(const Matrix &input, const Matrix &target,
                        const ScoreFunc &score_func) const;
-  void ShuffleData(Matrix &input, Matrix &target);
+  void ShuffleData(Matrix &input, Matrix &target, RandGen& rng);
 };
 } // namespace network

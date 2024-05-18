@@ -9,14 +9,15 @@ Network::Network(std::initializer_list<int> dimensions,
   assert(dimensions.size() == threshold_id.size() + 1);
   layers_.reserve(dimensions.size() - 1);
   auto dim_it = dimensions.begin();
+  RandGen rng = seed;
   for (auto threshold_it = threshold_id.begin();
        threshold_it != threshold_id.end(); ++dim_it, ++threshold_it) {
-    layers_.emplace_back(*threshold_it, *dim_it, *std::next(dim_it), seed,
+    layers_.emplace_back(*threshold_it, *dim_it, *std::next(dim_it), rng,
                          normalize);
   }
 }
 
-Network::Network(std::vector<Layer> && layers): layers_(layers){};
+Network::Network(std::vector<Layer> &&layers) : layers_(layers){};
 
 std::vector<LayerValue> Network::Forward_Prop(const Matrix &start_mat) const {
   std::vector<LayerValue> layer_values(layers_.size());
@@ -40,25 +41,26 @@ Vector Network::Calculate(const Vector &start_vec) const {
   return cur_mat;
 }
 
-void Network::ShuffleData(Matrix &input, Matrix &target) {
-  std::random_device rd;
+void Network::ShuffleData(Matrix &input, Matrix &target, RandGen &rng) {
   Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> perm(input.cols());
   perm.setIdentity();
   std::shuffle(perm.indices().data(),
-               perm.indices().data() + perm.indices().size(), rd);
+               perm.indices().data() + perm.indices().size(),
+               Eigen::Rand::PacketRandomEngineAdaptor<uint64_t, RandGen>(rng));
   input *= perm;
   target *= perm;
 }
 
 void Network::Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
                        const LearningRate &learning_rate, int epoch_num,
-                       int batch_size) {
+                       int batch_size, int seed) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(input.cols() % batch_size == 0 && "Number of batches must be integer");
+  RandGen rng = seed;
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
-    ShuffleData(input, target);
+    ShuffleData(input, target, rng);
     for (Index batch_num = 0; batch_num < input.cols() / batch_size;
          ++batch_num) {
       Index start_ind = batch_num * batch_size;
@@ -75,15 +77,15 @@ void Network::Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
 void Network::Train_SGD(Matrix input, Matrix target,
                         const ScoreFunc &score_func,
                         const LearningRate &learning_rate, int epoch_num,
-                        int sample_size) {
+                        int sample_size, int seed) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(sample_size <= input.cols() &&
          "Sample size must be less or equal to dataset size");
-
+  RandGen rng = seed;
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
     std::cout << "Epoch num: " << epoch << '\n';
-    ShuffleData(input, target);
+    ShuffleData(input, target, rng);
     for (Index el_num = 0; el_num < sample_size; ++el_num) {
       Index start_ind = el_num;
       const Matrix &input_el = input.block(0, start_ind, input.rows(), 1);
@@ -143,6 +145,5 @@ Matrix Network::GetGradMatrix(const Matrix &input, const Matrix &target,
   Matrix res = score_func.gradient(final_mat, target);
   return res;
 }
-
 
 } // namespace network

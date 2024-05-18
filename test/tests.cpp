@@ -68,11 +68,13 @@ void score_gradient_test() {
 }
 
 void layer_constructor_test() {
-  auto layer = Layer(ThresholdId::ReLu, 2, 3, 1, 1);
+  RandGen rng = 1;
+  auto layer = Layer(ThresholdId::ReLu, 2, 3, rng, 1);
 }
 
 void layer_grad_test() {
-  auto layer = Layer(ThresholdId::ReLu, 2, 2, 1, 1);
+  RandGen rng = 1;
+  auto layer = Layer(ThresholdId::ReLu, 2, 2, rng, 1);
   Matrix A(2, 2);
   A << 1, 1, 1, 1;
   Matrix grad(2, 2);
@@ -100,7 +102,7 @@ void network_train_gd_test() {
   Matrix batch(2, 3);
   Matrix target(4, 3);
   net.Train_GD(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
-            network::LearningRateDatabase::Constant(1), 1, 1);
+            network::LearningRateDatabase::Constant(1), 1, 1, 1);
 }
 void network_train_sgd_test(){
   auto net = Network({2, 3, 4, 5, 4},
@@ -110,7 +112,7 @@ void network_train_sgd_test(){
   Matrix batch(2, 3);
   Matrix target(4, 3);
   net.Train_SGD(batch, target, ScoreFunc::create(ScoreId::CrossEntropy),
-               network::LearningRateDatabase::Constant(1), 1, 1);
+               network::LearningRateDatabase::Constant(1), 1, 1, 1);
 }
 void network_train_readwrite_test(){
   auto net = Network({2, 3, 4, 5, 4},
@@ -120,7 +122,7 @@ void network_train_readwrite_test(){
   Matrix batch(2, 3);
   Matrix target(4, 3);
   net.Train_GD(batch, target, ScoreFunc::create(ScoreId::MAE),
-                network::LearningRateDatabase::Constant(1), 100, 1);
+                network::LearningRateDatabase::Constant(1), 100, 1, 1);
   net.StoreModel("test_data.data");
   auto net_loaded = net.LoadModel("test_data.data");
   Vector vec1 {{0, 1}};

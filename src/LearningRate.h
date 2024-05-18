@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <cmath>
 
 namespace network {
 using LearningRate = std::function<double(int)>;

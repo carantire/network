@@ -10,8 +10,7 @@ namespace network {
 
 class Layer {
 public:
-
-  Layer(ThresholdId id, Index in_size, Index out_size, int seed,
+  Layer(ThresholdId id, Index in_size, Index out_size, RandGen &rng,
         double normalize);
 
   Matrix apply_linear(const Matrix &values) const;
@@ -35,7 +34,11 @@ public:
   Matrix Get_Mat() const;
 
 private:
-  static Matrix getNormal(Index rows, Index columns, int seed,
+  Layer(Matrix&& A, Vector&& b, ThresholdId Id)
+      : A_(A), b_(b),
+        ThresholdFunc_(ThresholdFunc::create(Id)){};
+
+  static Matrix getNormal(Index rows, Index columns, RandGen &rng,
                           double normalize);
 
   Matrix derive(const Matrix &applied_values) const;
