@@ -22,9 +22,6 @@ target_include_directories(
 add_executable(mnist_train test/Mnist_test.cpp)
 target_include_directories(
         mnist_train PUBLIC "${PROJECT_SOURCE_DIR}/src")
-#add_executable(tests test/tests.cpp)
-#target_include_directories(
-#        tests PUBLIC "${PROJECT_SOURCE_DIR}/src")
 
 target_link_libraries(network_test PUBLIC network_lib)
 target_link_libraries(sin_train PUBLIC network_lib)
