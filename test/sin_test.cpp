@@ -26,7 +26,7 @@ int main() {
             network::LearningRateDatabase::Constant(0.005), 100, 1, 5);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_time = end - start;
-  std::cout << "Train time: " << elapsed_time.count() << "s\n";
+  std::cout << "\nTrain time: " << elapsed_time.count() << "s\n";
   double score = 0;
   std::uniform_real_distribution<> test_dis(0, M_PI);
   for (int i = 0; i < size; ++i) {

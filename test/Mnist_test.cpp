@@ -39,10 +39,10 @@ int main() {
   auto start = std::chrono::high_resolution_clock::now();
 
   net_store.Train_GD(input, target, ScoreFunc::create(ScoreId::MSE),
-                     LearningRateDatabase::Constant(0.04), 10, 20, 10);
+                     LearningRateDatabase::Constant(0.08), 10, 20, 10);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_time = end - start;
-  std::cout << "Train time: " << elapsed_time.count() << "s\n";
+  std::cout << "\nTrain time: " << elapsed_time.count() << "s\n";
   int correct = 0;
   std::cout << '\n';
   auto test_input = Mnist_input(dataset.test_images);
