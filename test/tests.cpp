@@ -123,9 +123,9 @@ void network_train_readwrite_test(){
                 network::LearningRateDatabase::Constant(1), 100, 1);
   net.StoreModel("test_data.data");
   auto net_loaded = net.LoadModel("test_data.data");
-  Vector vec1 {0, 1};
-  Vector vec2{-1, 3};
-  Vector vec3 {100, -500};
+  Vector vec1 {{0, 1}};
+  Vector vec2{{-1, 3}};
+  Vector vec3 {{100, -500}};
   assert(abs((net.Calculate(vec1) - net_loaded.Calculate(vec1)).maxCoeff()) < 1e-8);
   assert(abs((net.Calculate(vec2) - net_loaded.Calculate(vec2)).maxCoeff()) < 1e-8);
   assert(abs((net.Calculate(vec3) - net_loaded.Calculate(vec3)).maxCoeff()) < 1e-8);
