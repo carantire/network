@@ -13,7 +13,7 @@ struct ScoreDatabase {
 
   template <>
   inline double score<ScoreId::MSE>(const Vector &input, const Vector &target) {
-    return (input - target).dot(input - target);
+    return (input - target).squaredNorm();
   }
 
   template <>
@@ -28,8 +28,8 @@ struct ScoreDatabase {
   inline double score<ScoreId::MAE>(const Vector &input, const Vector &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
-    return Vector::Ones(input.rows()).transpose() *
-           (input - target).unaryExpr([](double el) { return abs(el); });
+    return
+           (input - target).cwiseAbs().sum();
   }
 
   template <>
@@ -37,9 +37,7 @@ struct ScoreDatabase {
                                        const Matrix &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
-    return (input - target).unaryExpr([](double el) {
-      return el > 0 ? 1.0 : -1.0;
-    });
+    return (input - target).cwiseSign();
   }
   template <>
   inline double score<ScoreId::CrossEntropy>(const Vector &input,
@@ -47,7 +45,7 @@ struct ScoreDatabase {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return -target.transpose() *
-           input.unaryExpr([](double el) { return log(el); });
+           input.array().log().matrix();
   }
   template <>
   inline Matrix gradient<ScoreId::CrossEntropy>(const Matrix &input,
@@ -55,7 +53,7 @@ struct ScoreDatabase {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
     return -target.cwiseProduct(
-        input.unaryExpr([](double el) { return 1.0 / el; }));
+        input.cwiseInverse());
   }
 };
 

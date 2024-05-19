@@ -5,7 +5,6 @@
 #include "ScoreFunc.h"
 #include <Eigen/Eigen>
 #include <cmath>
-#include <iostream>
 #include <filesystem>
 
 namespace network {

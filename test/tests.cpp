@@ -55,7 +55,43 @@ void score_constructor_test() {
   auto score_func_ent = ScoreFunc::create(ScoreId::CrossEntropy);
 }
 
-void score_gradient_test() {
+void score_calc_mae_test() {
+  auto score_func_mse = ScoreFunc::create(ScoreId::MAE);
+  Vector in(3);
+  Vector out(3);
+  in << 2, 3, 4;
+  out << 100, 200, 3;
+  auto score = score_func_mse.score(in, out);
+  double ans;
+  ans = 98 + 197 + 1;
+  assert(abs((score - ans)) < 1e-5);
+}
+
+void score_calc_mse_test() {
+  auto score_func_mse = ScoreFunc::create(ScoreId::MSE);
+  Vector in(3);
+  Vector out(3);
+  in << 2, 3, 4;
+  out << 5, 10, 3;
+  auto score = score_func_mse.score(in, out);
+  double ans;
+  ans = 3*3 + 7*7 + 1*1;
+  assert(abs((score - ans)) < 1e-5);
+}
+
+void score_gradient_mae_test() {
+  auto score_func_mse = ScoreFunc::create(ScoreId::MAE);
+  Vector in(3);
+  Vector out(3);
+  in << 2, 3, 4;
+  out << 100, 200, 3;
+  auto grad = score_func_mse.gradient(in, out);
+  Vector ans(3);
+  ans << -1, -1, 1;
+  assert(abs((grad - ans).array().maxCoeff()) < 1e-5);
+}
+
+void score_gradient_mse_test() {
   auto score_func_mse = ScoreFunc::create(ScoreId::MSE);
   Vector in(3);
   Vector out(3);
@@ -143,7 +179,10 @@ void test::run_all_tests() {
   relu_derive_test();
 
   score_constructor_test();
-  score_gradient_test();
+  score_calc_mae_test();
+  score_calc_mse_test();
+  score_gradient_mae_test();
+  score_gradient_mse_test();
 
   layer_constructor_test();
   layer_grad_test();
@@ -152,4 +191,6 @@ void test::run_all_tests() {
   network_train_gd_test();
   network_train_sgd_test();
   network_train_readwrite_test();
+
+  std::cout << "\n\nTests worked successfully!";
 }

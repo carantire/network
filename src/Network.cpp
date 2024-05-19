@@ -99,10 +99,8 @@ void Network::Train_SGD(Matrix input, Matrix target,
 void Network::StoreModel(const std::filesystem::path &path) {
   auto out_file = std::ofstream(
       path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
-  assert(out_file && "Problem with output file");
-  assert(out_file.is_open() && "Output file is not open");
   uint32_t layers_num = layers_.size();
-  out_file.write((char *)&layers_num, sizeof(layers_num));
+  out_file.write(reinterpret_cast<char*>(&layers_num), sizeof(layers_num));
   for (const auto &layer : layers_) {
     layer.WriteParams(out_file);
   }
@@ -111,7 +109,7 @@ void Network::StoreModel(const std::filesystem::path &path) {
 Network Network::LoadModel(const std::filesystem::path &path) {
   auto in_file = std::ifstream(path, std::ios_base::binary | std::ios_base::in);
   uint32_t layers_num;
-  in_file.read((char *)&layers_num, sizeof(layers_num));
+  in_file.read(reinterpret_cast<char*>(&layers_num), sizeof(layers_num));
   std::vector<Layer> layers;
   layers.reserve(layers_num);
   for (uint32_t i = 0; i < layers_num; ++i) {

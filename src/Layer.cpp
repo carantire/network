@@ -82,20 +82,20 @@ Layer Layer::ReadParams(std::ifstream &in) {
   Matrix A(out_size, in_size);
   Vector b(out_size);
   in.read((char *)A.data(),
-          in_size * out_size * sizeof(typename Matrix::Scalar));
-  in.read((char *)b.data(), out_size * 1 * sizeof(typename Vector::Scalar));
+          in_size * out_size * sizeof(Index));
+  in.read((char *)b.data(), out_size * 1 * sizeof(Index));
   return Layer(std::move(A), std::move(b), Id);
 }
 
 void Layer::WriteParams(std::ofstream &out) const {
-  typename Matrix::Index rows = A_.rows();
-  typename Matrix::Index cols = A_.cols();
+  Index rows = A_.rows();
+  Index cols = A_.cols();
   ThresholdId Id = ThresholdFunc_.GetId();
   out.write(reinterpret_cast<char *>(&Id), sizeof(Id));
   out.write(reinterpret_cast<char *>(&cols), sizeof(cols));
   out.write(reinterpret_cast<char *>(&rows), sizeof(rows));
-  out.write((char *)A_.data(), rows * cols * sizeof(typename Matrix::Scalar));
-  out.write((char *)b_.data(), rows * 1 * sizeof(typename Vector ::Scalar));
+  out.write((char *)A_.data(), rows * cols * sizeof(Index));
+  out.write((char *)b_.data(), rows * sizeof(Index));
 }
 
 } // namespace network

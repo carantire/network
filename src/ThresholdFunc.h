@@ -12,85 +12,40 @@ enum class ThresholdId { Sigmoid, ReLu, LeakyRelu, Default };
 
 struct ThresholdDatabase {
 
-  template <ThresholdId> static double evaluate_0(double);
+  template <ThresholdId> static Matrix evaluate_0(const Matrix &);
 
-  template <ThresholdId> static Matrix evaluate_0_mat(const Matrix &);
+  template <ThresholdId> static Matrix evaluate_1(const Matrix &);
 
-  template <ThresholdId> static double evaluate_1(double);
-
-  template <ThresholdId> static Matrix evaluate_1_mat(const Matrix &);
-
-  template <> inline double evaluate_0<ThresholdId::Sigmoid>(double x) {
-
-    double result = 1 / (1 + std::exp(-x));
-
-    assert(std::isfinite(result));
-    return result;
-  }
-
-  template <> inline double evaluate_1<ThresholdId::Sigmoid>(double x) {
-    assert(std::isfinite(x));
-    double result = 1. / (std::exp(-x) + std::exp(x) + 2.);
-    assert(std::isfinite(result));
-    return result;
-  }
-
-  template <> inline double evaluate_0<ThresholdId::ReLu>(double x) {
-    return x * (x > 0);
-  }
-
-  template <> inline double evaluate_1<ThresholdId::ReLu>(double x) {
-    return x > 0 ? 1 : 0;
-  }
-  template <> inline double evaluate_0<ThresholdId::LeakyRelu>(double x) {
-    return x > 0 ? x : exp(-2) * x;
-  }
-
-  template <> inline double evaluate_1<ThresholdId::LeakyRelu>(double x) {
-    return x > 0 ? 1 : exp(-2);
-  }
   template <>
-  inline Matrix evaluate_0_mat<ThresholdId::LeakyRelu>(const Matrix &mat) {
-    return mat.unaryExpr(
-        [](double x) { return evaluate_0<ThresholdId::LeakyRelu>(x); });
+  inline Matrix evaluate_0<ThresholdId::LeakyRelu>(const Matrix &mat) {
+    return mat.unaryExpr([](double x) { return x > 0 ? x : exp(-2) * x; });
   }
-  template <>
-  inline Matrix evaluate_1_mat<ThresholdId::LeakyRelu>(const Matrix &mat) {
-    return mat.unaryExpr(
-        [](double x) { return evaluate_1<ThresholdId::LeakyRelu>(x); });
+  template <> Matrix evaluate_1<ThresholdId::LeakyRelu>(const Matrix &mat) {
+    return mat.unaryExpr([](double x) { return x > 0 ? 1 : exp(-2); });
   }
-  template <>
-  inline Matrix evaluate_0_mat<ThresholdId::Default>(const Matrix &mat) {
+  template <> Matrix evaluate_0<ThresholdId::Default>(const Matrix &mat) {
     return mat;
   }
 
-  template <>
-  inline Matrix evaluate_1_mat<ThresholdId::Default>(const Matrix &mat) {
-    return mat;
+  template <> Matrix evaluate_1<ThresholdId::Default>(const Matrix &mat) {
+    return Matrix::Identity(mat.rows(), mat.cols());
   }
 
-  template <>
-  inline Matrix evaluate_0_mat<ThresholdId::Sigmoid>(const Matrix &mat) {
-    return mat.unaryExpr(
-        [](double x) { return evaluate_0<ThresholdId::Sigmoid>(x); });
+  template <> Matrix evaluate_0<ThresholdId::Sigmoid>(const Matrix &mat) {
+    return mat.unaryExpr([](double x) { return 1 / (1 + std::exp(-x)); });
   }
 
-  template <>
-  inline Matrix evaluate_1_mat<ThresholdId::Sigmoid>(const Matrix &mat) {
+  template <> Matrix evaluate_1<ThresholdId::Sigmoid>(const Matrix &mat) {
     return mat.unaryExpr(
-        [](double x) { return evaluate_1<ThresholdId::Sigmoid>(x); });
+        [](double x) { return 1. / (std::exp(-x) + std::exp(x) + 2.); });
   }
 
-  template <>
-  inline Matrix evaluate_0_mat<ThresholdId::ReLu>(const Matrix &mat) {
-    return mat.unaryExpr(
-        [](double x) { return evaluate_0<ThresholdId::ReLu>(x); });
+  template <> Matrix evaluate_0<ThresholdId::ReLu>(const Matrix &mat) {
+    return mat.unaryExpr([](double x) { return x * (x > 0); });
   }
 
-  template <>
-  inline Matrix evaluate_1_mat<ThresholdId::ReLu>(const Matrix &mat) {
-    return mat.unaryExpr(
-        [](double x) { return evaluate_1<ThresholdId::ReLu>(x); });
+  template <> Matrix evaluate_1<ThresholdId::ReLu>(const Matrix &mat) {
+    return mat.unaryExpr([](double x) {return x > 0 ? 1. : 0.; });
   }
 };
 
@@ -98,11 +53,12 @@ class ThresholdFunc {
 public:
   using FunctionType = std::function<Matrix(const Matrix &)>;
 
-  ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1, ThresholdId Id);
+  ThresholdFunc(FunctionType evaluate_0, FunctionType evaluate_1,
+                ThresholdId Id);
 
   template <ThresholdId Id> static ThresholdFunc create() {
-    return ThresholdFunc(ThresholdDatabase::evaluate_0_mat<Id>,
-                         ThresholdDatabase::evaluate_1_mat<Id>, Id);
+    return ThresholdFunc(ThresholdDatabase::evaluate_0<Id>,
+                         ThresholdDatabase::evaluate_1<Id>, Id);
   }
 
   static ThresholdFunc create(ThresholdId threshold);
