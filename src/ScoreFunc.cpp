@@ -52,8 +52,7 @@ struct ScoreDatabase {
                                                 const Matrix &target) {
     assert(input.rows() == target.rows() &&
            "input and target must have same size");
-    return -target.cwiseProduct(
-        input.cwiseInverse());
+    return -target.array()/input.array();
   }
 };
 

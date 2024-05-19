@@ -118,7 +118,7 @@ Network Network::LoadModel(const std::filesystem::path &path) {
   return Network(std::move(layers));
 }
 
-double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
+void Network::Back_Prop(const std::vector<LayerValue> &layer_values,
                           const Matrix &target, const ScoreFunc &score_func,
                           double step) {
   auto grad = GetGradMatrix(layer_values.back().out, target, score_func);
@@ -127,9 +127,7 @@ double Network::Back_Prop(const std::vector<LayerValue> &layer_values,
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
     grad = layers_[i].gradx(grad, layer_values[i].out);
   }
-  return Vector::Ones(grad.rows()).transpose() *
-         (grad * Vector::Ones(grad.cols()) / grad.cols())
-             .unaryExpr([](double el) { return abs(el); });
+
 }
 
 Matrix Network::GetGradMatrix(const Matrix &input, const Matrix &target,

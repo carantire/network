@@ -45,7 +45,7 @@ void Layer::apply_gradA(const Matrix &values, const Matrix &grad,
   assert(values.cols() == grad.cols() && "all matrices must have same cols");
 
   auto diff = (derive_mat(applied_val, grad) *
-               (values.transpose() / applied_val.cols()).eval())
+               (values.transpose() / applied_val.cols()))
                   .eval();
 
   assert(diff.cols() == A_.cols());
@@ -81,8 +81,7 @@ Layer Layer::ReadParams(std::ifstream &in) {
   in.read(reinterpret_cast<char *>(&out_size), sizeof(out_size));
   Matrix A(out_size, in_size);
   Vector b(out_size);
-  in.read((char *)A.data(),
-          in_size * out_size * sizeof(Index));
+  in.read((char *)A.data(), in_size * out_size * sizeof(Index));
   in.read((char *)b.data(), out_size * 1 * sizeof(Index));
   return Layer(std::move(A), std::move(b), Id);
 }

@@ -16,12 +16,20 @@ struct ThresholdDatabase {
 
   template <ThresholdId> static Matrix evaluate_1(const Matrix &);
 
+  template <> Matrix evaluate_0<ThresholdId::ReLu>(const Matrix &mat) {
+    return (mat.array() > 0).select(mat, 0.0);
+  }
+
+  template <> Matrix evaluate_1<ThresholdId::ReLu>(const Matrix &mat) {
+    return (mat.array() > 0).select(1.0 , Matrix::Zero(mat.rows(), mat.cols()));
+  }
+
   template <>
   inline Matrix evaluate_0<ThresholdId::LeakyRelu>(const Matrix &mat) {
-    return mat.unaryExpr([](double x) { return x > 0 ? x : exp(-2) * x; });
+    return (mat.array() > 0).select(mat, mat*exp(-2));
   }
   template <> Matrix evaluate_1<ThresholdId::LeakyRelu>(const Matrix &mat) {
-    return mat.unaryExpr([](double x) { return x > 0 ? 1 : exp(-2); });
+    return (mat.array() > 0).select(Matrix::Ones(mat.rows(), mat.cols()), exp(-2));
   }
   template <> Matrix evaluate_0<ThresholdId::Default>(const Matrix &mat) {
     return mat;
@@ -32,21 +40,14 @@ struct ThresholdDatabase {
   }
 
   template <> Matrix evaluate_0<ThresholdId::Sigmoid>(const Matrix &mat) {
-    return mat.unaryExpr([](double x) { return 1 / (1 + std::exp(-x)); });
+    return ((-mat).array().exp() + 1.0).inverse();
   }
 
   template <> Matrix evaluate_1<ThresholdId::Sigmoid>(const Matrix &mat) {
-    return mat.unaryExpr(
-        [](double x) { return 1. / (std::exp(-x) + std::exp(x) + 2.); });
+    return (mat.array().exp() + (-mat).array().exp() + 2.0).inverse();
   }
 
-  template <> Matrix evaluate_0<ThresholdId::ReLu>(const Matrix &mat) {
-    return mat.unaryExpr([](double x) { return x * (x > 0); });
-  }
 
-  template <> Matrix evaluate_1<ThresholdId::ReLu>(const Matrix &mat) {
-    return mat.unaryExpr([](double x) {return x > 0 ? 1. : 0.; });
-  }
 };
 
 class ThresholdFunc {

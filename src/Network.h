@@ -39,7 +39,7 @@ private:
   std::vector<Layer> layers_;
 
   std::vector<LayerValue> Forward_Prop(const Matrix &start_vec) const;
-  double Back_Prop(const std::vector<LayerValue> &layer_values,
+  void Back_Prop(const std::vector<LayerValue> &layer_values,
                    const Matrix &target, const ScoreFunc &score_func,
                    double step);
   Matrix GetGradMatrix(const Matrix &input, const Matrix &target,
