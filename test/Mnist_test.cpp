@@ -1,6 +1,7 @@
 #include "Network.h"
 #include <chrono>
 #include <mnist/mnist_reader.hpp>
+#include <iostream>
 
 using namespace network;
 using std::vector;

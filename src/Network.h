@@ -3,9 +3,7 @@
 #include "Layer.h"
 #include "LearningRate.h"
 #include "ScoreFunc.h"
-#include "iostream"
 #include <Eigen/Eigen>
-#include <cmath>
 #include <filesystem>
 
 namespace network {

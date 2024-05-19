@@ -2,6 +2,7 @@
 #include <Eigen/Eigen>
 #include <chrono>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <vector>
 
@@ -23,7 +24,7 @@ int main() {
       {ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::Sigmoid}, 1, 2);
   auto start = std::chrono::high_resolution_clock::now();
   net.Train_GD(in_values, target_values, ScoreFunc::create(ScoreId::MAE),
-            network::LearningRateDatabase::Constant(0.005), 100, 1, 5, true);
+               network::LearningRateDatabase::Constant(0.005), 100, 1, 5, true);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_time = end - start;
   std::cout << "\nTrain time: " << elapsed_time.count() << "s\n";
@@ -44,5 +45,5 @@ int main() {
     test_input << i * M_PI / n;
     val[i] = net.Calculate(test_input)(0, 0);
   }
-  std::cout << "Accuracy: " << 100*(1 - score / size) << "%";
+  std::cout << "Accuracy: " << 100 * (1 - score / size) << "%";
 }

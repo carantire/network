@@ -1,5 +1,6 @@
 #include "tests.h"
 #include "Network.h"
+#include <iostream>
 
 using namespace network;
 
