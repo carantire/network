@@ -1,0 +1,19 @@
+name: Build & Run Tests
+on: [push]
+jobs:
+  build-project:
+    name: Build Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.2
+        with:
+          submodules: recursive
+
+      - name: Build Project
+        run: |
+          cmake -B build/ -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+          make --directory build
+
+      - name: Run Tests
+        run: build/network_test
