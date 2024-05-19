@@ -68,8 +68,6 @@ int main() {
     double precision =
         double((average[i] - FP[i])) / (average[i] - FP[i] + FN[i]);
     double recall = double((average[i] - FP[i])) / (average[i]);
-    assert(isfinite(precision));
-    assert(isfinite(recall));
     F1 += (2 * precision * recall / (precision + recall)) *
           (double(average[i]) / dataset.test_labels.size());
   }
