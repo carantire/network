@@ -4,7 +4,6 @@
 #include <Eigen/Eigen>
 #include <EigenRand/EigenRand>
 #include <cmath>
-#include <iostream>
 
 namespace network {
 

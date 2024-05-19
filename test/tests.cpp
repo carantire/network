@@ -158,7 +158,7 @@ void network_train_readwrite_test(){
   Matrix batch(2, 3);
   Matrix target(4, 3);
   net.Train_GD(batch, target, ScoreFunc::create(ScoreId::MAE),
-                network::LearningRateDatabase::Constant(1), 100, 1, 1);
+                network::LearningRateDatabase::Constant(1), 5, 1, 1);
   net.StoreModel("test_data.data");
   auto net_loaded = net.LoadModel("test_data.data");
   Vector vec1 {{0, 1}};

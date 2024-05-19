@@ -1,5 +1,4 @@
 #include "Network.h"
-#include <algorithm>
 #include <chrono>
 #include <mnist/mnist_reader.hpp>
 
@@ -39,7 +38,7 @@ int main() {
   auto start = std::chrono::high_resolution_clock::now();
 
   net_store.Train_GD(input, target, ScoreFunc::create(ScoreId::MSE),
-                     LearningRateDatabase::Constant(0.08), 10, 20, 10);
+                     LearningRateDatabase::Constant(0.08), 10, 20, 10, true);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_time = end - start;
   std::cout << "\nTrain time: " << elapsed_time.count() << "s\n";

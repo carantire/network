@@ -53,13 +53,15 @@ void Network::ShuffleData(Matrix &input, Matrix &target, RandGen &rng) {
 
 void Network::Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
                        const LearningRate &learning_rate, int epoch_num,
-                       int batch_size, int seed) {
+                       int batch_size, int seed, bool debug) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(input.cols() % batch_size == 0 && "Number of batches must be integer");
   RandGen rng = seed;
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
-    std::cout << "Epoch num: " << epoch << '\n';
+    if (debug) {
+      std::cout << "Epoch num: " << epoch << '\n';
+    }
     ShuffleData(input, target, rng);
     for (Index batch_num = 0; batch_num < input.cols() / batch_size;
          ++batch_num) {
@@ -77,14 +79,16 @@ void Network::Train_GD(Matrix input, Matrix target, const ScoreFunc &score_func,
 void Network::Train_SGD(Matrix input, Matrix target,
                         const ScoreFunc &score_func,
                         const LearningRate &learning_rate, int epoch_num,
-                        int sample_size, int seed) {
+                        int sample_size, int seed, bool debug) {
   assert(input.cols() == target.cols() &&
          "Target size must coincide with batch size");
   assert(sample_size <= input.cols() &&
          "Sample size must be less or equal to dataset size");
   RandGen rng = seed;
   for (Index epoch = 1; epoch <= epoch_num; ++epoch) {
-    std::cout << "Epoch num: " << epoch << '\n';
+    if (debug) {
+      std::cout << "Epoch num: " << epoch << '\n';
+    }
     ShuffleData(input, target, rng);
     for (Index el_num = 0; el_num < sample_size; ++el_num) {
       Index start_ind = el_num;
@@ -100,7 +104,7 @@ void Network::StoreModel(const std::filesystem::path &path) {
   auto out_file = std::ofstream(
       path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
   uint32_t layers_num = layers_.size();
-  out_file.write(reinterpret_cast<char*>(&layers_num), sizeof(layers_num));
+  out_file.write(reinterpret_cast<char *>(&layers_num), sizeof(layers_num));
   for (const auto &layer : layers_) {
     layer.WriteParams(out_file);
   }
@@ -109,7 +113,7 @@ void Network::StoreModel(const std::filesystem::path &path) {
 Network Network::LoadModel(const std::filesystem::path &path) {
   auto in_file = std::ifstream(path, std::ios_base::binary | std::ios_base::in);
   uint32_t layers_num;
-  in_file.read(reinterpret_cast<char*>(&layers_num), sizeof(layers_num));
+  in_file.read(reinterpret_cast<char *>(&layers_num), sizeof(layers_num));
   std::vector<Layer> layers;
   layers.reserve(layers_num);
   for (uint32_t i = 0; i < layers_num; ++i) {
@@ -119,24 +123,20 @@ Network Network::LoadModel(const std::filesystem::path &path) {
 }
 
 void Network::Back_Prop(const std::vector<LayerValue> &layer_values,
-                          const Matrix &target, const ScoreFunc &score_func,
-                          double step) {
+                        const Matrix &target, const ScoreFunc &score_func,
+                        double step) {
   auto grad = GetGradMatrix(layer_values.back().out, target, score_func);
   for (Index i = layers_.size() - 1; i >= 0; --i) {
     layers_[i].apply_gradA(layer_values[i].in, grad, layer_values[i].out, step);
     layers_[i].apply_gradb(grad, layer_values[i].out, step);
     grad = layers_[i].gradx(grad, layer_values[i].out);
   }
-
 }
 
 Matrix Network::GetGradMatrix(const Matrix &input, const Matrix &target,
                               const ScoreFunc &score_func) const {
 
   auto final_mat = layers_.back().apply_threshold(input);
-  if (final_mat.size() != target.size()) {
-    std::cout << final_mat.rows() << " " << target.rows() << '\n';
-  }
   assert(final_mat.size() == target.size());
   Matrix res = score_func.gradient(final_mat, target);
   return res;

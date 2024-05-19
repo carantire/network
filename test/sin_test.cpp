@@ -23,7 +23,7 @@ int main() {
       {ThresholdId::Sigmoid, ThresholdId::Sigmoid, ThresholdId::Sigmoid}, 1, 2);
   auto start = std::chrono::high_resolution_clock::now();
   net.Train_GD(in_values, target_values, ScoreFunc::create(ScoreId::MAE),
-            network::LearningRateDatabase::Constant(0.005), 100, 1, 5);
+            network::LearningRateDatabase::Constant(0.005), 100, 1, 5, true);
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_time = end - start;
   std::cout << "\nTrain time: " << elapsed_time.count() << "s\n";
